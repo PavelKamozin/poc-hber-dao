@@ -1,10 +1,12 @@
 package softserve.hibernate.com;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@Slf4j
 public class Application implements CommandLineRunner {
 
     public static void main(String[] args) {
@@ -13,7 +15,7 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        System.out.println("Hello world");
+        log.info("Hello world");
     }
 
 }
