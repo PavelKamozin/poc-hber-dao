@@ -4,12 +4,11 @@ import lombok.Data;
 import softserve.hibernate.com.constant.RoleType;
 
 import javax.persistence.*;
-import java.lang.annotation.Annotation;
 
 @Data
 @Entity
 @Table(name = "roles")
-public class Role implements Entity{
+public class Role {
     private final String ENTITY_NAME = "ROLE";
 
     @Id
@@ -17,16 +16,7 @@ public class Role implements Entity{
     private int id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", columnDefinition="ENUM('GUEST','USER','ADMIN')", nullable = false)
+    @Column(name = "role", columnDefinition = "ENUM('GUEST','USER','ADMIN')", nullable = false)
     private RoleType roleType;
 
-    @Override
-    public String name() {
-        return ENTITY_NAME;
-    }
-
-    @Override
-    public Class<? extends Annotation> annotationType() {
-        return Role.class;
-    }
 }

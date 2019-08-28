@@ -3,12 +3,11 @@ package softserve.hibernate.com.entity;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.lang.annotation.Annotation;
 
 @Data
 @Entity
 @Table(name = "users")
-public class User implements Entity {
+public class User {
     private final String ENTITY_NAME = "USER";
 
     @Id
@@ -21,13 +20,4 @@ public class User implements Entity {
     @JoinColumn(name = "id_role")
     private Role role;
 
-    @Override
-    public String name() {
-        return ENTITY_NAME;
-    }
-
-    @Override
-    public Class<? extends Annotation> annotationType() {
-        return User.class;
-    }
 }

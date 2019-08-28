@@ -1,16 +1,13 @@
 package softserve.hibernate.com.dao;
 
 import lombok.Getter;
-import org.hibernate.boot.model.naming.Identifier;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityNotFoundException;
+import java.io.Serializable;
 import java.util.Map;
-import java.util.Optional;
 
 @Getter
-public abstract class GenericDaoAbstract implements GenericDao<Entity, Integer> {
+public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
     private JpaRepository<Entity, Identifier> repository;
 
@@ -34,10 +31,10 @@ public abstract class GenericDaoAbstract implements GenericDao<Entity, Integer> 
     }
 
     @Override
-    public Entity findById(Integer entityId) {
-        Optional<Entity> byId = repository.findById(Identifier.toIdentifier(entityId.toString()));
-        return byId.orElseThrow(EntityNotFoundException::new);
+    public Entity findById(Identifier entityId) {
+        return repository.findById(entityId).orElse(null);
     }
+
 
     @Override
     public Entity findByUniqueKey(Map<String, Object> fieldValueMap) {
@@ -46,7 +43,7 @@ public abstract class GenericDaoAbstract implements GenericDao<Entity, Integer> 
 
     @Override
     public long count() {
-        return 0;
+        return repository.count();
     }
 
     @Override
