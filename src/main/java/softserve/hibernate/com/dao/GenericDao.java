@@ -5,6 +5,7 @@ import com.wavemaker.runtime.data.model.AggregationInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Map;
 
 public interface GenericDao<Entity, Identifier> {
@@ -21,7 +22,7 @@ public interface GenericDao<Entity, Identifier> {
 
     Page<Entity> list(Pageable pageable);
 
-    Page getAssociatedObjects(Object value, String entityName, String key, Pageable pageable);
+    List<Entity> findByMultipleIds(List<Identifier> ids, boolean orderedReturn);
 
     Page<Entity> search(QueryFilter queryFilters[], Pageable pageable);
 

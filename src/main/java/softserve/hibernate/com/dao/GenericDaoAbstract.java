@@ -1,6 +1,7 @@
 package softserve.hibernate.com.dao;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 import com.wavemaker.runtime.data.expression.QueryFilter;
@@ -12,7 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
-    protected JpaRepository<Entity, Identifier> repository;
+    private JpaRepository<Entity, Identifier> repository;
 
     public GenericDaoAbstract(JpaRepository<Entity, Identifier> repository) {
         this.repository = repository;
@@ -59,7 +60,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     }
 
     @Override
-    public Page getAssociatedObjects(Object value, String entityName, String key, Pageable pageable) {
+    public List<Entity> findByMultipleIds(List<Identifier> ids, boolean orderedReturn) {
         return null;
     }
 

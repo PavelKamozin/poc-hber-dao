@@ -13,4 +13,8 @@ public class UserDaoImpl extends GenericDaoAbstract<User, Integer> {
     public UserDaoImpl(JpaRepository<User, Integer> repository) {
         super(repository);
     }
+
+    void test() {
+        getRepository().findById(1);
+    }
 }
