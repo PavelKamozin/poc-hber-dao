@@ -1,13 +1,14 @@
 package softserve.hibernate.com;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.logging.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@Slf4j
 public class Application implements CommandLineRunner {
+
+    private static final Logger log = Logger.getLogger(Application.class.getName());
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class);

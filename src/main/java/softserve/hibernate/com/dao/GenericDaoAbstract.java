@@ -1,14 +1,12 @@
 package softserve.hibernate.com.dao;
 
-import lombok.Getter;
+import java.io.Serializable;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.io.Serializable;
-import java.util.Map;
 
-@Getter
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
     private JpaRepository<Entity, Identifier> repository;
@@ -58,4 +56,12 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return 0;
     }
 
+    public JpaRepository<Entity, Identifier> getRepository() {
+        return repository;
+    }
+
+    public void setRepository(
+        JpaRepository<Entity, Identifier> repository) {
+        this.repository = repository;
+    }
 }
