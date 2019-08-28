@@ -1,6 +1,8 @@
 package softserve.hibernate.com.dao;
 
 import lombok.Getter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.io.Serializable;
@@ -39,6 +41,11 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     @Override
     public Entity findByUniqueKey(Map<String, Object> fieldValueMap) {
         return null;
+    }
+
+    @Override
+    public Page<Entity> list(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     @Override

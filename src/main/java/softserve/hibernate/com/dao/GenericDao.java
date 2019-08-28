@@ -1,5 +1,8 @@
 package softserve.hibernate.com.dao;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.Map;
 
 public interface GenericDao<Entity, Identifier> {
@@ -14,7 +17,7 @@ public interface GenericDao<Entity, Identifier> {
 
     Entity findByUniqueKey(final Map<String, Object> fieldValueMap);
 
-    //Page<Entity> list(Pageable pageable);
+    Page<Entity> list(Pageable pageable);
 
     //Page getAssociatedObjects(Object value, String entityName, String key, Pageable pageable);
 
