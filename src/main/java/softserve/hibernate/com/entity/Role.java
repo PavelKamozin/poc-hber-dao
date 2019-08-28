@@ -1,6 +1,7 @@
 package softserve.hibernate.com.entity;
 
 import lombok.Data;
+import softserve.hibernate.com.constant.RoleType;
 
 import javax.persistence.*;
 

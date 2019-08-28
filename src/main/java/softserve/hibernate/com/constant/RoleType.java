@@ -1,4 +1,4 @@
-package softserve.hibernate.com.entity;
+package softserve.hibernate.com.constant;
 
 public enum RoleType {
     GUEST, USER, ADMIN;
