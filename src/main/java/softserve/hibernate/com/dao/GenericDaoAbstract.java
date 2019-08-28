@@ -10,9 +10,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    private Class<Entity> entityClass;
     private JpaRepository<Entity, Identifier> repository;
 
     public GenericDaoAbstract(JpaRepository<Entity, Identifier> repository) {
@@ -56,7 +63,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
     @Override
     public long count(String query) {
-        return 0;
+        return entityManager.createQuery("select * from " + entityClass.getName() + " " + query).getResultList().size();
     }
 
     @Override
