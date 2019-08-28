@@ -2,7 +2,7 @@ package softserve.hibernate.com.dao;
 
 import java.util.Map;
 
-public interface HibernateGenericDao<Entity, Identifier> {
+public interface GenericDao<Entity, Identifier> {
 
     Entity create(Entity entity);
 
