@@ -5,7 +5,6 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Environment;
 import org.hibernate.service.ServiceRegistry;
-import softserve.hibernate.com.entity.Role;
 
 import java.util.Properties;
 
@@ -30,8 +29,6 @@ public class HibernateUtil {
             settings.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
 
             configuration.setProperties(settings);
-
-            configuration.addAnnotatedClass(Role.class);
 
             serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
