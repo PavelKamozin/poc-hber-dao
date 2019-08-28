@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
-    private JpaRepository<Entity, Identifier> repository;
+    protected JpaRepository<Entity, Identifier> repository;
 
     public GenericDaoAbstract(JpaRepository<Entity, Identifier> repository) {
         this.repository = repository;
@@ -56,12 +56,4 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return 0;
     }
 
-    public JpaRepository<Entity, Identifier> getRepository() {
-        return repository;
-    }
-
-    public void setRepository(
-        JpaRepository<Entity, Identifier> repository) {
-        this.repository = repository;
-    }
 }
