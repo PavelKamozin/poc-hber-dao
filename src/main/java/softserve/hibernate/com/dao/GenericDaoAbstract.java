@@ -2,6 +2,9 @@ package softserve.hibernate.com.dao;
 
 import java.io.Serializable;
 import java.util.Map;
+
+import com.wavemaker.runtime.data.expression.QueryFilter;
+import com.wavemaker.runtime.data.model.AggregationInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,7 +38,6 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return repository.findById(entityId).orElse(null);
     }
 
-
     @Override
     public Entity findByUniqueKey(Map<String, Object> fieldValueMap) {
         return null;
@@ -56,4 +58,32 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return 0;
     }
 
+    @Override
+    public Page getAssociatedObjects(Object value, String entityName, String key, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public Page<Entity> search(QueryFilter[] queryFilters, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public Page<Entity> searchByQuery(String query, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) {
+        return null;
+    }
+
+    public JpaRepository<Entity, Identifier> getRepository() {
+        return repository;
+    }
+
+    public void setRepository(
+        JpaRepository<Entity, Identifier> repository) {
+        this.repository = repository;
+    }
 }
