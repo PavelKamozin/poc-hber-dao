@@ -14,7 +14,5 @@ public class UserDaoImplTest extends PersistenceTestBase {
     @Test
     public void test() {
         log.info(UserDaoImplTest.class.getName());
-
-        dao.create(new User());
     }
 }

@@ -1,16 +1,16 @@
 package softserve.hibernate.com.dao.impl;
 
-import org.hibernate.boot.model.naming.Identifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import softserve.hibernate.com.dao.GenericDaoAbstract;
-
-import javax.persistence.Entity;
+import softserve.hibernate.com.entity.User;
 
 @Service
-public class UserDaoImpl<User, Integer> extends GenericDaoAbstract {
+public class UserDaoImpl extends GenericDaoAbstract<User, Integer> {
 
-    public UserDaoImpl(JpaRepository<Entity, Identifier> repository) {
+    @Autowired
+    public UserDaoImpl(JpaRepository<User, Integer> repository) {
         super(repository);
     }
 }
