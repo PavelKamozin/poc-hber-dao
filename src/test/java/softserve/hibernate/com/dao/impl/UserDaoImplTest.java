@@ -1,13 +1,15 @@
 package softserve.hibernate.com.dao.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.logging.Logger;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import softserve.hibernate.com.Application;
 import softserve.hibernate.com.PersistenceTestBase;
-import softserve.hibernate.com.entity.User;
 
-@Slf4j
 public class UserDaoImplTest extends PersistenceTestBase {
+
+    private static final Logger log = Logger.getLogger(UserDaoImplTest.class.getName());
+
     @Autowired
     private UserDaoImpl dao;
 
