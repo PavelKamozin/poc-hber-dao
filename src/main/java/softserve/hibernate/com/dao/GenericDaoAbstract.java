@@ -3,12 +3,15 @@ package softserve.hibernate.com.dao;
 import com.wavemaker.runtime.data.expression.QueryFilter;
 import com.wavemaker.runtime.data.model.AggregationInfo;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -94,7 +97,25 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
     @Override
     public Page<Entity> searchByQuery(String query, Pageable pageable) {
-        return null;
+        String simpleNameClass = getSimpleName();
+        String aliasSimpleNameClass = getNameAlias();
+        Query queryEntity = entityManager.createQuery(
+                SELECT
+                        + aliasSimpleNameClass
+                        + FROM
+                        + simpleNameClass
+                        + WHITE_SPACE
+                        + aliasSimpleNameClass
+                        + WHERE
+                        + query
+        ).setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize());
+
+        long total = count(query);
+
+        List<Entity> entities = total > pageable.getOffset() ? queryEntity.getResultList() : Collections.emptyList();
+
+        return new PageImpl<>(entities, pageable, total);
     }
 
     @Override
