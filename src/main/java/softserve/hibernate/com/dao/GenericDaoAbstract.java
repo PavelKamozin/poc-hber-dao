@@ -1,9 +1,5 @@
 package softserve.hibernate.com.dao;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-
 import com.wavemaker.runtime.data.expression.QueryFilter;
 import com.wavemaker.runtime.data.model.AggregationInfo;
 import org.springframework.data.domain.Page;
@@ -11,19 +7,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
-    @PersistenceContext
     private EntityManager entityManager;
-
     private Class<Entity> entityClass;
     private JpaRepository<Entity, Identifier> repository;
 
-    public GenericDaoAbstract(JpaRepository<Entity, Identifier> repository) {
+    public GenericDaoAbstract(JpaRepository<Entity, Identifier> repository, EntityManager entityManager) {
         this.repository = repository;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -91,7 +87,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     }
 
     public void setRepository(
-        JpaRepository<Entity, Identifier> repository) {
+            JpaRepository<Entity, Identifier> repository) {
         this.repository = repository;
     }
 }
