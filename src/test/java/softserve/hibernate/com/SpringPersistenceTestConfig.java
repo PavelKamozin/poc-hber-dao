@@ -6,7 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.rest.RepositoryRestMvcAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import softserve.hibernate.com.constant.RoleType;
 import softserve.hibernate.com.dao.impl.UserDaoImpl;
+import softserve.hibernate.com.entity.Role;
 import softserve.hibernate.com.repository.RoleRepository;
 import softserve.hibernate.com.repository.UserRepository;
 
@@ -26,6 +28,9 @@ public class SpringPersistenceTestConfig {
 
     @PostConstruct
     public void load() {
+        roleRepository.save(new Role(RoleType.ADMIN));
+        roleRepository.save(new Role(RoleType.USER));
+        roleRepository.save(new Role(RoleType.GUEST));
     }
 
     @PreDestroy

@@ -22,9 +22,15 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
 
 import static java.util.Objects.nonNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
@@ -184,20 +190,19 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         this.repository = repository;
     }
 
-    private String getSimpleName() {
-        return entityClass.getSimpleName();
-    }
-
-    private String getNameAlias() {
-        return entityClass.getSimpleName().substring(0, 1).toLowerCase();
-    }
-
-
     public EntityManager getEntityManager() {
         return entityManager;
     }
 
     public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
+    }
+
+    private String getSimpleName() {
+        return entityClass.getSimpleName();
+    }
+
+    private String getNameAlias() {
+        return entityClass.getSimpleName().substring(0, 1).toLowerCase();
     }
 }
