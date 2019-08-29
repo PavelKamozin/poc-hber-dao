@@ -1,8 +1,12 @@
 package softserve.hibernate.com.dao;
 
+import com.wavemaker.runtime.data.expression.QueryFilter;
+import com.wavemaker.runtime.data.model.AggregationInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.hibernate5.HibernateCallback;
 
+import java.util.List;
 import java.util.Map;
 
 public interface GenericDao<Entity, Identifier> {
@@ -19,17 +23,19 @@ public interface GenericDao<Entity, Identifier> {
 
     Page<Entity> list(Pageable pageable);
 
-    //Page getAssociatedObjects(Object value, String entityName, String key, Pageable pageable);
+    List<Entity> findByMultipleIds(List<Identifier> ids, boolean orderedReturn);
 
-    //Page<Entity> search(QueryFilter queryFilters[], Pageable pageable);
+    Page<Entity> search(QueryFilter queryFilters[], Pageable pageable);
 
-    //Page<Entity> searchByQuery(String query, Pageable pageable);
+    Page<Entity> searchByQuery(String query, Pageable pageable);
 
     long count();
 
     long count(String query);
 
-    //Page<Map<String, Object>> getAggregatedValues(final AggregationInfo aggregationInfo, Pageable pageable);
+    Page<Map<String, Object>> getAggregatedValues(final AggregationInfo aggregationInfo, Pageable pageable);
+
+    <Entity> Entity execute(HibernateCallback<Entity> hibernateCallback);
 
     //Downloadable export(ExportType exportType, String query, Pageable pageable);
 }

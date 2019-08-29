@@ -4,15 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import softserve.hibernate.com.dao.GenericDaoAbstract;
-import softserve.hibernate.com.entity.User;
+import softserve.hibernate.com.entity.Role;
 
 import javax.persistence.EntityManager;
 
 @Repository
-public class UserDaoImpl extends GenericDaoAbstract<User, Integer> {
+public class RoleDaoImpl extends GenericDaoAbstract<Role, Integer> {
 
     @Autowired
-    public UserDaoImpl(EntityManager entityManager, JpaRepository<User, Integer> repository) {
+    public RoleDaoImpl(JpaRepository<Role, Integer> repository, EntityManager entityManager) {
         super(repository, entityManager);
     }
+
 }

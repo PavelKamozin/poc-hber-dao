@@ -1,14 +1,16 @@
 package softserve.hibernate.com;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.rest.RepositoryRestMvcAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
-import org.springframework.context.ApplicationContext;
+import softserve.hibernate.com.constant.RoleType;
+import softserve.hibernate.com.dao.impl.UserDaoImpl;
+import softserve.hibernate.com.entity.Role;
+import softserve.hibernate.com.repository.RoleRepository;
+import softserve.hibernate.com.repository.UserRepository;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -16,22 +18,25 @@ import javax.annotation.PreDestroy;
 @SpringBootApplication(exclude = {
         WebMvcAutoConfiguration.class,
         SpringDataWebAutoConfiguration.class,
-        RepositoryRestMvcAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class})
-@Slf4j
+        RepositoryRestMvcAutoConfiguration.class})
 public class SpringPersistenceTestConfig {
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
-    private ApplicationContext context;
+    private UserRepository userRepository;
 
     @PostConstruct
     public void load() {
-
+        roleRepository.save(new Role(RoleType.ADMIN));
+        roleRepository.save(new Role(RoleType.USER));
+        roleRepository.save(new Role(RoleType.GUEST));
     }
 
     @PreDestroy
-    public void deleteDB() {
-
+    public void deleteTestData() {
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
     }
 
     public static void main(String[] args) {
