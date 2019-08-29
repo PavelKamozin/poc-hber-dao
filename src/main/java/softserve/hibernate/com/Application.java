@@ -1,32 +1,22 @@
 package softserve.hibernate.com;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.domain.PageRequest;
 import softserve.hibernate.com.constant.RoleType;
 import softserve.hibernate.com.dao.impl.RoleDaoImpl;
-import softserve.hibernate.com.dao.impl.UserDaoImpl;
 import softserve.hibernate.com.entity.Role;
+import softserve.hibernate.com.repository.RoleRepository;
 
 import java.util.logging.Logger;
-import softserve.hibernate.com.entity.User;
-import softserve.hibernate.com.repository.RoleRepository;
-import softserve.hibernate.com.repository.UserRepository;
 
 @SpringBootApplication
 public class Application implements CommandLineRunner {
 
     @Autowired
     private RoleDaoImpl roleDao;
-
-    @Autowired
-    private UserDaoImpl userDao;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -41,32 +31,26 @@ public class Application implements CommandLineRunner {
     public void run(String... args) {
         log.info("Hello world");
 
-        clearTables();
-        Role role = new Role(RoleType.ADMIN);
+        roleRepository.deleteAll();
+
+        Role role = new Role();
+        role.setRoleType(RoleType.ADMIN);
+
         roleDao.create(role);
-        Role role2 = new Role(RoleType.USER);
+
+        Role role1 = new Role();
+        role1.setRoleType(RoleType.USER);
+
+        roleDao.create(role1);
+
+        Role role2 = new Role();
+        role2.setRoleType(RoleType.GUEST);
+
         roleDao.create(role2);
 
-        User user = new User("Andrii", role);
-        userDao.create(user);
-         user = new User("Andrii Torzhkov", role);
-        userDao.create(user);
-         user = new User("Andrii Kozachenko", role2);
-        userDao.create(user);
+        System.out.println(roleDao.searchByQuery("role is not null", PageRequest.of(0 ,2)));
 
-
-        Map<String, Object> map = new HashMap<>();
-        //map.put("name", "Andrii");
-        map.put("role",role);
-
-        System.out.println(userDao.findByUniqueKey(map));
-
-        clearTables();
-    }
-
-    private void clearTables() {
         roleRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
 }
