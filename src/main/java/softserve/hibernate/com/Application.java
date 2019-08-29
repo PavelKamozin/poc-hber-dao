@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.domain.PageRequest;
+import softserve.hibernate.com.constant.RoleType;
 import softserve.hibernate.com.dao.impl.RoleDaoImpl;
 import softserve.hibernate.com.entity.Role;
 import softserve.hibernate.com.repository.RoleRepository;
