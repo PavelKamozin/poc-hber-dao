@@ -24,6 +24,10 @@ public class User implements Serializable {
     @Column(name = "last_name")
     private String lastName;
 
+    private String job;
+
+    private Integer age;
+
     @ManyToOne
     @JoinColumn(name = "id_role")
     private Role role;
@@ -33,6 +37,14 @@ public class User implements Serializable {
 
     public User(String name, Role role) {
         this.name = name;
+        this.role = role;
+    }
+
+    public User(String name, String lastName, String job, Integer age, Role role) {
+        this.name = name;
+        this.lastName = lastName;
+        this.job = job;
+        this.age = age;
         this.role = role;
     }
 
@@ -58,6 +70,22 @@ public class User implements Serializable {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getJob() {
+        return job;
+    }
+
+    public void setJob(String job) {
+        this.job = job;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
     }
 
     public Role getRole() {

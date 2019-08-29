@@ -42,6 +42,7 @@ public abstract class PersistenceTestBase {
         this.roleDao = roleDao;
     }
 
+    @Autowired
     public RoleRepository getRoleRepository() {
         return roleRepository;
     }
@@ -50,6 +51,7 @@ public abstract class PersistenceTestBase {
         this.roleRepository = roleRepository;
     }
 
+    @Autowired
     public UserRepository getUserRepository() {
         return userRepository;
     }
