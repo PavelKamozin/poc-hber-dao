@@ -4,6 +4,7 @@ import com.wavemaker.runtime.data.expression.QueryFilter;
 import com.wavemaker.runtime.data.model.AggregationInfo;
 import com.wavemaker.runtime.data.util.CriteriaUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
@@ -37,6 +38,9 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     private static final String SELECT = " select ";
     private static final String FROM = " from ";
     private static final String WHERE = " where ";
+    private static final String IN = " in ";
+    private static final String ID = "id ";
+    private static final String ORDER_BY = " order by ";
     private static final String WHITE_SPACE = " ";
 
     private EntityManager entityManager;
@@ -113,7 +117,26 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
     @Override
     public List<Entity> findByMultipleIds(List<Identifier> ids, boolean orderedReturn) {
-        return null;
+        String simpleNameClass = getSimpleName();
+        String aliasSimpleNameClass = getNameAlias();
+        String query = SELECT
+            + aliasSimpleNameClass
+            + FROM
+            + simpleNameClass
+            + WHITE_SPACE
+            + aliasSimpleNameClass
+            + WHERE
+            + aliasSimpleNameClass + "."
+            + ID
+            + IN + "("
+            + StringUtils.join(ids, ",")
+            + ")"
+            + orderedReturnQuery(orderedReturn);
+        return entityManager.createQuery(query).getResultList();
+    }
+
+    private String orderedReturnQuery(boolean orderedReturn){
+        return orderedReturn ? ORDER_BY + ID + " asc " : "";
     }
 
     @Override
