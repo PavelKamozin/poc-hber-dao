@@ -25,15 +25,14 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
-
-import static java.util.Objects.nonNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static java.util.Objects.nonNull;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
@@ -78,8 +77,6 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return repository.findById(entityId).orElse(null);
     }
 
-
-
     @Override
     @Transactional
     public Entity findByUniqueKey(Map<String, Object> fieldValueMap) {
@@ -87,9 +84,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         CriteriaQuery<Entity> cq = criteriaBuilder.createQuery(entityClass);
         Root<Entity> entityRoot = cq.from(entityClass);
         List<Predicate> filterPredicates = new ArrayList<>();
-        fieldValueMap.forEach((key, value) -> {
-            filterPredicates.add(criteriaBuilder.equal(entityRoot.get(key), value));
-        });
+        fieldValueMap.forEach((key, value) -> filterPredicates.add(criteriaBuilder.equal(entityRoot.get(key), value)));
         cq.where(filterPredicates.toArray(new Predicate[0]));
         return (entityManager.createQuery(cq).getResultList().size() != 0
             && entityManager.createQuery(cq).getResultList().size()==1) ?
