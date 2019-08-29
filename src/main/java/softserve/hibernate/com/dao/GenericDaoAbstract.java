@@ -14,6 +14,11 @@ import java.util.Map;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
+    private static final String SELECT = " select ";
+    private static final String FROM = " from ";
+    private static final String WHERE = " where ";
+    private static final String WHITE_SPACE = " ";
+
     private EntityManager entityManager;
     private Class<Entity> entityClass;
     private JpaRepository<Entity, Identifier> repository;
@@ -63,16 +68,16 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
     @Override
     public long count(String query) {
-        String simpleNameClass = entityClass.getSimpleName();
-        String aliasSimpleNameClass = entityClass.getSimpleName().substring(0, 1).toLowerCase();
+        String simpleNameClass = getSimpleName();
+        String aliasSimpleNameClass = getNameAlias();
         return entityManager.createQuery(
-                "select "
+                SELECT
                         + aliasSimpleNameClass
-                        + " from "
+                        + FROM
                         + simpleNameClass
-                        + " "
+                        + WHITE_SPACE
                         + aliasSimpleNameClass
-                        + " where "
+                        + WHERE
                         + query
         ).getResultList().size();
     }
@@ -105,4 +110,13 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
             JpaRepository<Entity, Identifier> repository) {
         this.repository = repository;
     }
+
+    private String getSimpleName() {
+        return entityClass.getSimpleName();
+    }
+
+    private String getNameAlias() {
+        return entityClass.getSimpleName().substring(0, 1).toLowerCase();
+    }
+
 }
