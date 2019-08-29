@@ -7,12 +7,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.orm.hibernate5.HibernateCallback;
+import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -76,7 +78,10 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return repository.findById(entityId).orElse(null);
     }
 
+
+
     @Override
+    @Transactional
     public Entity findByUniqueKey(Map<String, Object> fieldValueMap) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Entity> cq = criteriaBuilder.createQuery(entityClass);
@@ -116,6 +121,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     }
 
     @Override
+    @Transactional
     public List<Entity> findByMultipleIds(List<Identifier> ids, boolean orderedReturn) {
         String simpleNameClass = getSimpleName();
         String aliasSimpleNameClass = getNameAlias();
@@ -200,8 +206,10 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     }
 
     @Override
+    @Transactional
     public <Entity> Entity execute(HibernateCallback<Entity> hibernateCallback) {
-        return null;
+        HibernateTemplate template = new HibernateTemplate(entityManager.getEntityManagerFactory().unwrap(SessionFactory.class));
+        return template.execute(hibernateCallback);
     }
 
     public JpaRepository<Entity, Identifier> getRepository() {
