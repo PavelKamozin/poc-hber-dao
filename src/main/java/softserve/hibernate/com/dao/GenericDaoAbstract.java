@@ -8,12 +8,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
@@ -56,7 +61,15 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
     @Override
     public Entity findByUniqueKey(Map<String, Object> fieldValueMap) {
-        return null;
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Entity> cq = criteriaBuilder.createQuery(entityClass);
+        Root<Entity> entityRoot = cq.from(entityClass);
+        List<Predicate> filterPredicates = new ArrayList<>();
+        fieldValueMap.forEach((key, value) -> {
+            filterPredicates.add(criteriaBuilder.equal(entityRoot.get(key), value));
+        });
+        cq.where(filterPredicates.toArray(new Predicate[0]));
+        return entityManager.createQuery(cq).getSingleResult();
     }
 
     @Override
@@ -74,14 +87,14 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         String simpleNameClass = getSimpleName();
         String aliasSimpleNameClass = getNameAlias();
         return entityManager.createQuery(
-                SELECT
-                        + aliasSimpleNameClass
-                        + FROM
-                        + simpleNameClass
-                        + WHITE_SPACE
-                        + aliasSimpleNameClass
-                        + WHERE
-                        + query
+            SELECT
+                + aliasSimpleNameClass
+                + FROM
+                + simpleNameClass
+                + WHITE_SPACE
+                + aliasSimpleNameClass
+                + WHERE
+                + query
         ).getResultList().size();
     }
 
@@ -113,7 +126,8 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
         long total = count(query);
 
-        List<Entity> entities = total > pageable.getOffset() ? queryEntity.getResultList() : Collections.emptyList();
+        List<Entity> entities = total > pageable.getOffset() ? queryEntity.getResultList() : Collections
+            .emptyList();
 
         return new PageImpl<>(entities, pageable, total);
     }
