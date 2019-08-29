@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 import softserve.hibernate.com.constant.RoleType;
 
 
@@ -50,9 +51,9 @@ public class Role implements Serializable {
     @Override
     public String toString() {
         return "Role{" +
-            "id=" + id +
-            ", roleType=" + roleType +
-            '}';
+                "id=" + id +
+                ", roleType=" + roleType +
+                '}';
     }
 
     @Override
@@ -65,7 +66,7 @@ public class Role implements Serializable {
         }
         Role role = (Role) o;
         return id == role.id &&
-            roleType == role.roleType;
+                roleType == role.roleType;
     }
 
     @Override
