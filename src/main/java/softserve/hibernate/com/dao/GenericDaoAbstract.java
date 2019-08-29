@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.persistence.EntityManager;
 import java.io.Serializable;
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,9 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     public GenericDaoAbstract(JpaRepository<Entity, Identifier> repository, EntityManager entityManager) {
         this.repository = repository;
         this.entityManager = entityManager;
+
+        ParameterizedType genericSuperclass = (ParameterizedType) getClass().getGenericSuperclass();
+        this.entityClass = (Class<Entity>) genericSuperclass.getActualTypeArguments()[0];
     }
 
     @Override
@@ -59,7 +63,18 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
     @Override
     public long count(String query) {
-        return entityManager.createQuery("select * from " + entityClass.getName() + " " + query).getResultList().size();
+        String simpleNameClass = entityClass.getSimpleName();
+        String aliasSimpleNameClass = entityClass.getSimpleName().substring(0, 1).toLowerCase();
+        return entityManager.createQuery(
+                "select "
+                        + aliasSimpleNameClass
+                        + " from "
+                        + simpleNameClass
+                        + " "
+                        + aliasSimpleNameClass
+                        + " where "
+                        + query
+        ).getResultList().size();
     }
 
     @Override
