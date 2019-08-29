@@ -15,6 +15,8 @@ import softserve.hibernate.com.entity.Role;
 import softserve.hibernate.com.entity.User;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static com.wavemaker.runtime.data.util.QueryParserConstants.NOTNULL;
@@ -145,5 +147,35 @@ public class UserDaoImplTest extends PersistenceTestBase {
         getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole));
         getUserRepository().save(new User("Rolan", "Undodze", "doctor", 34, userRole));
         getUserRepository().save(new User("Miho", "Lokodze", "narrator", 99, guestRole));
+    }
+
+    @Test
+    public void testFindByUniqueKeyWhenExist() {
+        createUsers(adminRole, userRole, guestRole);
+        User expectedUser = new User("IVano", "IAdzo", "policeman", 24, adminRole);
+        getUserRepository().save(expectedUser);
+        Map<String, Object> uniqueKey = new HashMap<>();
+        uniqueKey.put("name","IVano");
+        uniqueKey.put("lastName","IAdzo");
+        uniqueKey.put("job","policeman");
+        uniqueKey.put("age",24);
+        uniqueKey.put("role",adminRole);
+        User actualUser = getDao().findByUniqueKey(uniqueKey);
+        assertUser(expectedUser,actualUser);
+
+    }
+    @Test
+    public void testFindByUniqueKeyWhenNotExist() {
+        createUsers(adminRole, userRole, guestRole);
+        User expectedUser = new User("IVano", "IAdzo", "policeman", 24, adminRole);
+        getUserRepository().save(expectedUser);
+        Map<String, Object> uniqueKey = new HashMap<>();
+        uniqueKey.put("name","Iano");
+        uniqueKey.put("lastName","IAdzo");
+        uniqueKey.put("job","policeman");
+        uniqueKey.put("age",24);
+        uniqueKey.put("role",adminRole);
+        User actualUser = getDao().findByUniqueKey(uniqueKey);
+        assertNull(actualUser);
     }
 }

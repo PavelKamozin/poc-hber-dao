@@ -91,7 +91,9 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
             filterPredicates.add(criteriaBuilder.equal(entityRoot.get(key), value));
         });
         cq.where(filterPredicates.toArray(new Predicate[0]));
-        return entityManager.createQuery(cq).getSingleResult();
+        return (entityManager.createQuery(cq).getResultList().size() != 0
+            && entityManager.createQuery(cq).getResultList().size()==1) ?
+            entityManager.createQuery(cq).getResultList().get(0) : null;
     }
 
     @Override
