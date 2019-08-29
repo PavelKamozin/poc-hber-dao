@@ -71,10 +71,10 @@ public class User implements Serializable {
     @Override
     public String toString() {
         return "User{" +
-            "id=" + id +
-            ", name='" + name + '\'' +
-            ", role=" + role +
-            '}';
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", role=" + role +
+                '}';
     }
 
     @Override
@@ -87,8 +87,8 @@ public class User implements Serializable {
         }
         User user = (User) o;
         return id == user.id &&
-            Objects.equals(name, user.name) &&
-            Objects.equals(role, user.role);
+                Objects.equals(name, user.name) &&
+                Objects.equals(role, user.role);
     }
 
     @Override
