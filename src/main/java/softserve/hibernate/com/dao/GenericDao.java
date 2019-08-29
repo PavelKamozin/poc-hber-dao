@@ -4,6 +4,7 @@ import com.wavemaker.runtime.data.expression.QueryFilter;
 import com.wavemaker.runtime.data.model.AggregationInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.hibernate5.HibernateCallback;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,8 @@ public interface GenericDao<Entity, Identifier> {
     long count(String query);
 
     Page<Map<String, Object>> getAggregatedValues(final AggregationInfo aggregationInfo, Pageable pageable);
+
+    <Entity> Entity execute(HibernateCallback<Entity> hibernateCallback);
 
     //Downloadable export(ExportType exportType, String query, Pageable pageable);
 }
