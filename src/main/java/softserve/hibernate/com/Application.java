@@ -4,9 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import softserve.hibernate.com.constant.RoleType;
 import softserve.hibernate.com.dao.impl.RoleDaoImpl;
-import softserve.hibernate.com.entity.Role;
+import softserve.hibernate.com.dao.impl.UserDaoImpl;
 import softserve.hibernate.com.repository.RoleRepository;
 
 import java.util.logging.Logger;
@@ -22,6 +21,9 @@ public class Application implements CommandLineRunner {
 
     private static final Logger log = Logger.getLogger(Application.class.getName());
 
+    @Autowired
+    private UserDaoImpl userDao;
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
     }
@@ -29,17 +31,6 @@ public class Application implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("Hello world");
-
-        roleRepository.deleteAll();
-
-        Role role = new Role();
-        role.setRoleType(RoleType.ADMIN);
-
-        roleDao.create(role);
-
-        System.out.println(roleDao.count("role = 'ADMIN'"));
-
-        roleRepository.deleteAll();
     }
 
 }
