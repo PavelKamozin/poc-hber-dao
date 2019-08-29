@@ -6,6 +6,7 @@ import com.wavemaker.runtime.data.util.CriteriaUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,12 +21,9 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static java.util.Objects.nonNull;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
@@ -144,14 +142,26 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
                         + aliasSimpleNameClass
                         + WHERE
                         + query
-        ).setFirstResult((int) pageable.getOffset())
-                .setMaxResults(pageable.getPageSize());
+        );
 
-        long total = count(query);
+        List<Entity> entities;
+        long total;
 
-        List<Entity> entities = total > pageable.getOffset() ? queryEntity.getResultList() : Collections.emptyList();
+        if (nonNull(pageable)) {
 
-        return new PageImpl<>(entities, pageable, total);
+            queryEntity
+                    .setFirstResult((int) pageable.getOffset())
+                    .setMaxResults(pageable.getPageSize());
+
+            total = count(query);
+
+            entities = total > pageable.getOffset() ? queryEntity.getResultList() : Collections.emptyList();
+
+        } else {
+            entities = queryEntity.getResultList();
+        }
+
+        return new PageImpl<>(entities, pageable, entities.size());
     }
 
     @Override
@@ -164,7 +174,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     }
 
     public void setRepository(
-        JpaRepository<Entity, Identifier> repository) {
+            JpaRepository<Entity, Identifier> repository) {
         this.repository = repository;
     }
 
