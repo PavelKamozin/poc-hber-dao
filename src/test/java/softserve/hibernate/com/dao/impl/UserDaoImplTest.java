@@ -20,6 +20,8 @@ import java.util.logging.Logger;
 import static com.wavemaker.runtime.data.util.QueryParserConstants.NOTNULL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class UserDaoImplTest extends PersistenceTestBase {
@@ -36,6 +38,39 @@ public class UserDaoImplTest extends PersistenceTestBase {
         adminRole = getRoleRepository().getByRoleType(RoleType.ADMIN);
         userRole = getRoleRepository().getByRoleType(RoleType.USER);
         guestRole = getRoleRepository().getByRoleType(RoleType.GUEST);
+    }
+
+    @Test
+    public void testReadCreate() {
+        User expected = getUserRepository().save(new User("Read user", "Name", "Job", 20, adminRole));
+        User actual = getDao().findById(expected.getId());
+
+        assertUser(expected, actual);
+    }
+
+    @Test
+    public void testUpdate() {
+        User original = getUserRepository().save(new User("Read user", "Name", "Job", 20, adminRole));
+        User expected = getDao().findById(original.getId());
+
+        expected.setName("New name");
+        expected.setAge(999);
+        getDao().update(expected);
+
+        User actual = getDao().findById(expected.getId());
+        assertUser(expected, actual);
+    }
+
+    @Test
+    public void testDelete() {
+        User original = getUserRepository().save(new User("Read user", "Name", "Job", 20, adminRole));
+        User actual = getDao().findById(original.getId());
+
+        assertUser(original, actual);
+        getDao().delete(actual);
+
+        User expected = getDao().findById(actual.getId());
+        assertNull(expected);
     }
 
     @Test
@@ -89,6 +124,16 @@ public class UserDaoImplTest extends PersistenceTestBase {
 
     public GenericDao<User, Integer> getDao() {
         return getUserDao();
+    }
+
+    private void assertUser(User expected, User actual) {
+        assertNotNull(expected);
+        assertNotNull(actual);
+        assertThat(expected.getName(), is(actual.getName()));
+        assertThat(expected.getAge(), is(actual.getAge()));
+        assertThat(expected.getId(), is(actual.getId()));
+        assertThat(expected.getJob(), is(actual.getJob()));
+        assertThat(expected.getRole().getId(), is(actual.getRole().getId()));
     }
 
     private void createUsers(Role adminRole, Role userRole, Role guestRole) {
