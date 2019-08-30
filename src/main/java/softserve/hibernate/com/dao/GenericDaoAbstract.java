@@ -31,12 +31,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
-
-import static java.util.Objects.nonNull;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -247,6 +245,11 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         System.out.println(entities);
 
         return null;
+    }
+
+    @Override
+    public Entity refresh(Entity entity) {
+        return repository.saveAndFlush(entity);
     }
 
     private Map<String, Object> getAliasValues(Query queryEntity) {
