@@ -1,0 +1,7 @@
+{
+  "id" : "securityService",
+  "type" : "SecurityServiceType",
+  "packageNames" : [ "com.wavemaker.runtime.security.controller" ],
+  "serviceClassNames" : [ "com.wavemaker.runtime.security.SecurityService" ],
+  "title" : "securityService"
+}

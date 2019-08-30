@@ -1,6 +1,11 @@
 package softserve.hibernate.com.dao;
 
 import com.wavemaker.runtime.data.expression.QueryFilter;
+import com.wavemaker.runtime.data.filter.LegacyQueryFilterInterceptor;
+import com.wavemaker.runtime.data.filter.QueryInterceptor;
+import com.wavemaker.runtime.data.filter.WMQueryFunctionInterceptor;
+import com.wavemaker.runtime.data.filter.WMQueryInfo;
+import com.wavemaker.runtime.data.model.Aggregation;
 import com.wavemaker.runtime.data.model.AggregationInfo;
 import com.wavemaker.runtime.data.util.CriteriaUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -9,6 +14,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.query.internal.QueryImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +32,9 @@ import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +44,10 @@ import static java.util.Objects.nonNull;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
+    private static final List<QueryInterceptor> interceptors = Arrays.asList(
+            new LegacyQueryFilterInterceptor(),
+            new WMQueryFunctionInterceptor());
+
     private static final String SELECT = " select ";
     private static final String FROM = " from ";
     private static final String WHERE = " where ";
@@ -43,6 +55,10 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     private static final String ID = "id ";
     private static final String ORDER_BY = " order by ";
     private static final String WHITE_SPACE = " ";
+    private static final String COUNT_QUERY_TEMPLATE = "select count(*) from ({0}) wmTempTable";
+    private static final String GROUP_BY = " group by ";
+    private static final String SELECT_COUNT1 = "select count(*) ";
+    private static final String FROM_HQL = "FROM ";
 
     private EntityManager entityManager;
     private Class<Entity> entityClass;
@@ -76,6 +92,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     public Entity findById(Identifier entityId) {
         return repository.findById(entityId).orElse(null);
     }
+
 
     @Override
     @Transactional
@@ -123,22 +140,22 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         String simpleNameClass = getSimpleName();
         String aliasSimpleNameClass = getNameAlias();
         String query = SELECT
-            + aliasSimpleNameClass
-            + FROM
-            + simpleNameClass
-            + WHITE_SPACE
-            + aliasSimpleNameClass
-            + WHERE
-            + aliasSimpleNameClass + "."
-            + ID
-            + IN + "("
-            + StringUtils.join(ids, ",")
-            + ")"
-            + orderedReturnQuery(orderedReturn);
+                + aliasSimpleNameClass
+                + FROM
+                + simpleNameClass
+                + WHITE_SPACE
+                + aliasSimpleNameClass
+                + WHERE
+                + aliasSimpleNameClass + "."
+                + ID
+                + IN + "("
+                + StringUtils.join(ids, ",")
+                + ")"
+                + orderedReturnQuery(orderedReturn);
         return entityManager.createQuery(query).getResultList();
     }
 
-    private String orderedReturnQuery(boolean orderedReturn){
+    private String orderedReturnQuery(boolean orderedReturn) {
         return orderedReturn ? ORDER_BY + ID + " asc " : "";
     }
 
@@ -198,8 +215,152 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     }
 
     @Override
+    @Transactional
     public Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) {
+
+        WMQueryInfo queryInfo = build(aggregationInfo);
+
+        String query = queryInfo.getQuery();
+
+        String countQuery = getCountQuery(query);
+
+        long count = (Long) entityManager.createQuery(countQuery).getSingleResult();
+
+        Query queryEntity = entityManager.createQuery(query);
+
+        List<String> entities;
+
+        if (nonNull(pageable)) {
+
+            queryEntity
+                    .setFirstResult((int) pageable.getOffset())
+                    .setMaxResults(pageable.getPageSize());
+
+            entities = count > pageable.getOffset() ? queryEntity.getResultList() : Collections.emptyList();
+
+        } else {
+            entities = Collections.emptyList();
+        }
+
+        System.out.println(entities);
+
         return null;
+    }
+
+    @Override
+    public Entity refresh(Entity entity) {
+        return repository.saveAndFlush(entity);
+    }
+
+    private Map<String, Object> getAliasValues(Query queryEntity) {
+        String[] alias = ((QueryImpl) queryEntity).getReturnAliases();
+        List<Integer> values = (List<Integer>) queryEntity.getResultList().get(0);
+
+        Map<String, Object> dataAliases = new HashMap<>();
+
+        for (int i = 0; i < alias.length; i++) {
+            dataAliases.put(alias[i], values.get(i));
+        }
+
+        return dataAliases;
+
+    }
+
+    public WMQueryInfo build(AggregationInfo aggregationInfo) {
+        StringBuilder builder = new StringBuilder();
+        Map<String, Object> parameters = new HashMap<>();
+
+        String projections = generateProjections(aggregationInfo);
+
+        if (StringUtils.isNotBlank(projections)) {
+            builder.append("select ")
+                    .append(projections)
+                    .append(" ");
+        }
+
+        builder.append("from ")
+                .append(getSimpleName())
+                .append(" ");
+
+        String filter = aggregationInfo.getFilter();
+
+        if (StringUtils.isNotBlank(filter)) {
+            final WMQueryInfo queryInfo = interceptFilter(filter);
+            builder.append("where ")
+                    .append(queryInfo.getQuery())
+                    .append(" ");
+            parameters = queryInfo.getParameters();
+        }
+
+        List<String> groupByFields = aggregationInfo.getGroupByFields();
+
+        if (!groupByFields.isEmpty()) {
+            builder.append("group by ")
+                    .append(StringUtils.join(groupByFields, ","))
+                    .append(" ");
+        }
+
+        return new WMQueryInfo(builder.toString(), parameters);
+    }
+
+    private String generateProjections(AggregationInfo aggregationInfo) {
+        List<String> projections = new ArrayList<>();
+
+        List<String> groupByFields = aggregationInfo.getGroupByFields();
+
+        if (!groupByFields.isEmpty()) {
+            for (final String field : groupByFields) {
+                projections.add(field + " as " + cleanAlias(field));
+            }
+        }
+
+        List<Aggregation> aggregations = aggregationInfo.getAggregations();
+
+        if (!aggregations.isEmpty()) {
+            for (final Aggregation aggregation : aggregations) {
+                projections.add(aggregation.asSelection());
+            }
+        }
+
+        return StringUtils.join(projections, ",");
+    }
+
+    private String cleanAlias(String alias) {
+        return alias.replaceAll("\\.", "\\$");
+    }
+
+    private WMQueryInfo interceptFilter(String filter) {
+        WMQueryInfo queryInfo = new WMQueryInfo(filter);
+
+        for (final QueryInterceptor interceptor : interceptors) {
+            interceptor.intercept(queryInfo);
+        }
+
+        return queryInfo;
+    }
+
+    private String getCountQuery(String query) {
+        query = query.trim();
+
+        String countQuery = null;
+        int index = StringUtils.indexOfIgnoreCase(query, GROUP_BY);
+        if (index == -1) {
+            index = StringUtils.indexOfIgnoreCase(query, FROM_HQL);
+            if (index >= 0) {
+                if (index != 0) {
+                    index = StringUtils.indexOfIgnoreCase(query, FROM);
+                    if (index > 0) {
+                        query = query.substring(index);
+                    }
+                }
+                index = StringUtils.indexOfIgnoreCase(query, ORDER_BY);
+                if (index >= 0) {
+                    query = query.substring(0, index);
+                }
+                countQuery = SELECT_COUNT1 + query;
+            }
+        }
+        return countQuery;
     }
 
     @Override

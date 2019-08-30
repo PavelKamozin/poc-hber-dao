@@ -1,0 +1,6 @@
+{
+  "id" : "db_hibernate",
+  "type" : "DataService",
+  "packageNames" : [ "com.softeserve.wm_demo.db_hibernate" ],
+  "title" : "db_hibernate"
+}

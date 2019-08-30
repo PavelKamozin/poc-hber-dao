@@ -37,5 +37,7 @@ public interface GenericDao<Entity, Identifier> {
 
     <Entity> Entity execute(HibernateCallback<Entity> hibernateCallback);
 
+    Entity refresh(Entity entity);
+
     //Downloadable export(ExportType exportType, String query, Pageable pageable);
 }

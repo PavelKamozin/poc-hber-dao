@@ -1,0 +1,121 @@
+<project name="ProjectBuildHelper" basedir=".">
+    <description>
+        Project Build Helper
+    </description>
+    <property name="webInf" location="src/main/webapp/WEB-INF"/>
+
+    <property name="angular-out-directory" value="${basedir}/target/codegen"/>
+    <property name="angular_build_file_location" location="${angular-out-directory}/build.xml"/>
+
+    <condition property="isAngularBuild" value="true">
+        <equals arg1="${build.ui.mode}" arg2="angular" casesensitive="false" trim="true"/>
+    </condition>
+    <condition property="isWmBuild" value="true">
+        <not>
+            <equals arg1="${build.ui.mode}" arg2="angular" casesensitive="false" trim="true"/>
+        </not>
+    </condition>
+
+    <target name="copy-libs-jar">
+        <mkdir dir="${webInf}/lib"/>
+        <echo>Copying jars from ${basedir}/lib to ${webInf}/lib</echo>
+        <copy todir="${webInf}/lib" overwrite="true">
+            <fileset dir="lib">
+                <exclude name="Readme.txt"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="copy-wm-project-properties">
+        <mkdir dir="target/classes"/>
+        <echo>Copying .wmproject.properties file to target/classes(classpath)</echo>
+        <copy file=".wmproject.properties" todir="target/classes" overwrite="true" failonerror="false"/>
+    </target>
+
+    <target name="cdnUrl-replace">
+        <replaceregexp file="src/main/webapp/index.html" byline="true">
+            <regexp pattern="/studio/.*/wmapp"/>
+            <substitution expression="_cdnUrl_/wmapp"/>
+        </replaceregexp>
+        <replaceregexp file="src/main/webapp/index.html" byline="true">
+            <regexp pattern="//.*.cloudfront.net/studio-app/.*/wmapp"/>
+            <substitution expression="_cdnUrl_/wmapp"/>
+        </replaceregexp>
+        <replaceregexp file="src/main/webapp/index.html" byline="true">
+            <regexp pattern="/studio/.*/wmmobile"/>
+            <substitution expression="_cdnUrl_/wmmobile"/>
+        </replaceregexp>
+        <replaceregexp file="src/main/webapp/index.html" byline="true">
+            <regexp pattern="//.*.cloudfront.net/studio-app/.*/wmmobile"/>
+            <substitution expression="_cdnUrl_/wmmobile"/>
+        </replaceregexp>
+    </target>
+
+
+    <target name="cmd-template">
+        <condition property="cmd.executable" value="cmd" else="${cmd.name}">
+            <os family="windows"/>
+        </condition>
+        <condition property="cmd.argline" value="/c ${cmd.name} ${cmd.arg}" else="${cmd.arg}">
+            <os family="windows"/>
+        </condition>
+
+        <exec executable="${cmd.executable}" dir="${cmd.executable.dir}" failonerror="true">
+            <arg line="${cmd.argline}"/>
+        </exec>
+        <echo>Ran command "${cmd.executable}" with args "${cmd.argline}" in directory ${cmd.executable.dir}</echo>
+    </target>
+
+    <target name="angular-unpack">
+        <antcall target="cmd-template">
+            <param name="cmd.name" value="mvn"/>
+            <!--Artifact groupId:artifactId:version[:packaging[:classifier]]. -DrepoUrl=${wavemaker.repo.url}-->
+            <param name="cmd.arg"
+                   value="dependency:unpack -Dartifact=com.wavemaker.app.build:wavemaker-ng-codegen:${wavemaker.studio.version}:zip:wmapp -DoutputDirectory=&quot;${angular-out-directory}&quot;"/>
+            <param name="cmd.executable.dir" value="./"/>
+        </antcall>
+    </target>
+
+    <target name="build-angular-app" depends="angular-unpack">
+        <echo>Downloaded Angular Runtime Files</echo>
+        <condition property="build.ui.ng.args" value="">
+            <not>
+                <isset property="build.ui.ng.args"/>
+            </not>
+        </condition>
+        <ant antfile="${angular_build_file_location}" target="ng-build-angular-app">
+            <property name="ngBuildArgs" value="${build.ui.ng.args}"/>
+            <property name="nodeBuildArgs" value="${build.ui.node.args}"/>
+            <property name="codegen_location" value="${angular-out-directory}"/>
+        </ant>
+        <echo>Angular Code Generated</echo>
+    </target>
+
+
+    <target name="wm-unpack">
+        <antcall target="cmd-template">
+            <param name="cmd.name" value="mvn"/>
+            <!--Artifact groupId:artifactId:version[:packaging[:classifier]].-->
+            <param name="cmd.arg"
+                   value="dependency:unpack  -Dartifact=com.wavemaker.runtime:wavemaker-app-runtime:${wavemaker.studio.version}:zip:${wavemaker.artifactType} -DoutputDirectory=&quot;${basedir}/src/main/webapp/${wavemaker.artifactStaticFolder}&quot;"/>
+            <param name="cmd.executable.dir" value="./"/>
+        </antcall>
+    </target>
+
+    <target name="wmBuild" if="isWmBuild">
+        <antcall target="wm-unpack"/>
+        <echo>UI Build done with WaveMaker Runtime!</echo>
+    </target>
+
+    <target name="angularBuild" if="isAngularBuild">
+        <antcall target="build-angular-app"/>
+        <echo>UI Build done with Angular Runtime!</echo>
+    </target>
+
+    <target name="uiBuild">
+        <antcall target="wmBuild"/>
+        <antcall target="angularBuild"/>
+    </target>
+
+    <target name="init" depends="copy-libs-jar,copy-wm-project-properties,cdnUrl-replace"></target>
+</project>

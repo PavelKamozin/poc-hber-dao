@@ -1,0 +1,6 @@
+[ {
+  "urlPattern" : "/**",
+  "permission" : "Authenticated",
+  "roles" : null,
+  "httpMethod" : null
+} ]

@@ -1,0 +1,7 @@
+{
+  "id" : "CommonService",
+  "type" : "JavaService",
+  "packageNames" : [ "com.softeserve.wm_demo.commonservice" ],
+  "serviceClassNames" : [ "com.softeserve.wm_demo.commonservice.CommonService" ],
+  "title" : "CommonService"
+}

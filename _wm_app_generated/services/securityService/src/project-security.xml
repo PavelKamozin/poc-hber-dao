@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<beans xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd"
+       xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <bean class="com.wavemaker.runtime.security.SecurityService" id="securityService"/>
+    <bean class="com.wavemaker.runtime.security.controller.SecurityController" id="securityController"/>
+    <bean class="com.wavemaker.runtime.web.filter.SSLSecureFilter" id="sslSecureFilter"/>
+    <bean class="com.wavemaker.runtime.security.xss.filter.WMXSSFilter" id="wmXSSFilter"/>
+    <bean class="com.wavemaker.runtime.security.filter.WMFrameOptionsHeaderFilter" id="wmFrameOptionsFilter">
+        <property name="frameOptions" ref="frameOptions"/>
+    </bean>
+    <bean class="com.wavemaker.commons.model.security.FrameOptions" id="frameOptions">
+        <property name="enabled" value="${general.frameOptions.enabled}"/>
+        <property name="mode" value="${general.frameOptions.mode}"/>
+        <property name="allowFromUrl" value="${general.frameOptions.allowFromUrl}"/>
+    </bean>
+    <bean class="com.wavemaker.runtime.security.filter.WMXContentTypeOptionsFilter" id="wmXContentTypeOptionsFilter"/>
+    <bean class="org.springframework.web.filter.CorsFilter" id="corsFilter">
+        <constructor-arg ref="corsConfigurationSource"/>
+    </bean>
+    <bean class="org.springframework.web.cors.UrlBasedCorsConfigurationSource" id="corsConfigurationSource"/>
+    <bean class="com.wavemaker.runtime.cors.CorsBeanPostProcessor" id="corsBeanPostProcessor"/>
+    <bean class="org.springframework.security.web.FilterChainProxy" id="wmCompositeSecurityFilter">
+        <constructor-arg>
+            <security:filter-chain pattern="/**" filters="sslSecureFilter, wmXSSFilter, wmFrameOptionsFilter, wmXContentTypeOptionsFilter,corsFilter"/>
+        </constructor-arg>
+    </bean>
+    <bean class="com.wavemaker.runtime.data.spring.WMPropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>
+                    classpath:securityService.properties
+                </value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+        <property name="searchSystemEnvironment" value="true"/>
+    </bean>
+    <bean class="com.wavemaker.runtime.security.config.WMAppSecurityConfig" id="WMAppSecurityConfig">
+        <property name="sslConfig" ref="sslConfig"/>
+        <property name="xssConfig" ref="xssConfig"/>
+        <property name="enforceSecurity">
+            <value>${enabled}</value>
+        </property>
+    </bean>
+    <bean class="com.wavemaker.commons.model.security.SSLConfig" id="sslConfig">
+        <property name="useSSL" value="${general.ssl.enabled}"/>
+        <property name="sslPort" value="${general.ssl.port}"/>
+        <property name="excludedUrls" value="#{null}"/>
+    </bean>
+    <bean class="com.wavemaker.commons.model.security.XSSConfig" id="xssConfig">
+        <property name="enforceXssSecurity" value="${general.xss.enabled}"/>
+        <property name="policyFile" value="wm-xss-policies.xml"/>
+        <property name="xssFilterStrategy" value="ENCODE"/>
+    </bean>
+    <bean class="com.wavemaker.commons.model.security.CorsConfig" id="corsConfig">
+        <property name="enabled" value="${general.cors.enabled}"/>
+        <property name="maxAge" value="${general.cors.maxAge}"/>
+        <property name="allowCredentials" value="${general.cors.allowCredentials}"/>
+        <property name="pathEntries">
+            <list>
+                <bean class="com.wavemaker.commons.model.security.PathEntry" id="root">
+                    <property name="name" value="root"/>
+                    <property name="path" value="/**"/>
+                    <property name="allowedOrigins" value="${general.cors.root.allowedOrigins}"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+</beans>
