@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static softserve.hibernate.com.builder.QueryBuilder.build;
 import static softserve.hibernate.com.builder.QueryBuilder.getCountQuery;
@@ -208,7 +209,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
         String countQuery = getCountQuery(query);
 
-        long count = (Long) entityManager.createQuery(countQuery).getSingleResult();
+        long count = isNull(countQuery) ? Integer.MAX_VALUE : (Long) entityManager.createQuery(countQuery).getSingleResult();
 
         List<Map<String, Object>> result = new ArrayList<>();
 
