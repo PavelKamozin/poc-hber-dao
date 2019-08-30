@@ -1,0 +1,21 @@
+<wm-page name="mainpage" pagetitle="Main">
+    <wm-header content="header" name="header" height="auto"></wm-header>
+    <wm-top-nav name="topnav" content="topnav"></wm-top-nav>
+    <wm-content name="content">
+        <wm-left-panel columnwidth="2" name="leftpanel" content="leftnav"></wm-left-panel>
+        <wm-page-content columnwidth="8" name="mainContent" padding="unset 15px">
+            <wm-layoutgrid name="layoutgrid1" show="bind:Variables.supportedLocale.dataSet.en">
+                <wm-gridrow name="gridrow1">
+                    <wm-gridcolumn columnwidth="6" name="gridcolumn1"></wm-gridcolumn>
+                    <wm-gridcolumn columnwidth="6" name="gridcolumn2"></wm-gridcolumn>
+                </wm-gridrow>
+                <wm-gridrow name="gridrow2">
+                    <wm-gridcolumn columnwidth="6" name="gridcolumn3"></wm-gridcolumn>
+                    <wm-gridcolumn columnwidth="6" name="gridcolumn4"></wm-gridcolumn>
+                </wm-gridrow>
+            </wm-layoutgrid>
+        </wm-page-content>
+        <wm-right-panel columnwidth="2" name="rightpanel" content="rightnav"></wm-right-panel>
+    </wm-content>
+    <wm-footer name="footer" content="footer"></wm-footer>
+</wm-page>
