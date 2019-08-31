@@ -137,7 +137,9 @@ public class QueryBuilder {
 
         if (nonNull(params) && !params.isEmpty()) {
             params.forEach((key, value) -> {
-                replace(builder, ":" + key, "'" + value.toString() + "'");
+                String from = ":" + key;
+                String to = value instanceof Float ? value.toString() : "'" + value.toString() + "'";
+                replace(builder, from, to);
             });
         }
 
