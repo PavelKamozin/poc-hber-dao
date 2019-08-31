@@ -220,12 +220,16 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
             List<Tuple> aggregationData = entityManager.createQuery(query, Tuple.class).getResultList();
 
-            Tuple tuple = aggregationData.get(0);
-
             Map<String, Object> data = new HashMap<>();
 
-            for (Aggregation aggregation : aggregations) {
-                data.put(aggregation.getAlias(), tuple.get(aggregation.getAlias()));
+            if (!aggregationData.isEmpty()) {
+
+                Tuple tuple = aggregationData.get(0);
+
+                for (Aggregation aggregation : aggregations) {
+                    data.put(aggregation.getAlias(), tuple.get(aggregation.getAlias()));
+                }
+
             }
 
             result.add(data);
