@@ -1,15 +1,9 @@
 package softserve.hibernate.com.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import softserve.hibernate.com.constant.RoleType;
 
@@ -24,6 +18,9 @@ public class Role implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", columnDefinition = "ENUM('GUEST','USER','ADMIN')", nullable = false)
     private RoleType roleType;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
 
     public Role() {
     }
@@ -46,6 +43,14 @@ public class Role implements Serializable {
 
     public void setRoleType(RoleType roleType) {
         this.roleType = roleType;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 
     @Override

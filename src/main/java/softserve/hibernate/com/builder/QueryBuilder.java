@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.nonNull;
 
 public class QueryBuilder {
 
@@ -129,6 +130,23 @@ public class QueryBuilder {
             }
         }
         return countQuery;
+    }
+
+    public static String configureParameters(String query, Map<String, Object> params) {
+        StringBuilder builder = new StringBuilder(query);
+
+        if (nonNull(params) && !params.isEmpty()) {
+            params.forEach((key, value) -> {
+                replace(builder, ":" + key, "'" + value.toString() + "'");
+            });
+        }
+
+        return builder.toString();
+    }
+
+    private static void replace(StringBuilder builder, String from, String to) {
+        int index = builder.indexOf(from);
+        builder.replace(index, index + from.length(), to);
     }
 
 }

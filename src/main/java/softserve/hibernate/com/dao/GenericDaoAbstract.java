@@ -33,6 +33,7 @@ import java.util.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static softserve.hibernate.com.builder.QueryBuilder.build;
+import static softserve.hibernate.com.builder.QueryBuilder.configureParameters;
 import static softserve.hibernate.com.builder.QueryBuilder.getCountQuery;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
@@ -205,7 +206,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
         WMQueryInfo queryInfo = build(aggregationInfo, getSimpleName(), getNameAlias());
 
-        String query = queryInfo.getQuery();
+        String query = configureParameters(queryInfo.getQuery(), queryInfo.getParameters());
 
         String countQuery = getCountQuery(query);
 
