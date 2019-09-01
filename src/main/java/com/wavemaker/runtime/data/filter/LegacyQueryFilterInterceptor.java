@@ -1,10 +1,13 @@
 package com.wavemaker.runtime.data.filter;
 
 import com.wavemaker.runtime.data.expression.Type;
+import com.wavemaker.runtime.data.model.QueryInfo;
+import org.springframework.stereotype.Component;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class LegacyQueryFilterInterceptor implements QueryInterceptor {
 
     private static final String LEGACY_QUERY_EXPRESSION = "([\\w]+)[\\s]+(startswith|endswith|containing)[\\s][\"']([^']+)+([\"'])";
@@ -17,11 +20,11 @@ public class LegacyQueryFilterInterceptor implements QueryInterceptor {
     private static final byte VALUE = 3;
 
     @Override
-    public void intercept(final WMQueryInfo queryInfo) {
+    public void intercept(final QueryInfo queryInfo) {
         queryInfo.setQuery(replaceExpressionWithHQL(queryInfo.getQuery()));
     }
 
-    static String replaceExpressionWithHQL(String query) {
+    private String replaceExpressionWithHQL(String query) {
         Matcher matcher = legacyQueryPattern.matcher(query);
         StringBuffer hqlQuery = new StringBuffer();
         while (matcher.find()) {

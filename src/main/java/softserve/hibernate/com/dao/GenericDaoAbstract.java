@@ -1,7 +1,7 @@
 package softserve.hibernate.com.dao;
 
 import com.wavemaker.runtime.data.expression.QueryFilter;
-import com.wavemaker.runtime.data.filter.WMQueryInfo;
+import com.wavemaker.runtime.data.model.QueryInfo;
 import com.wavemaker.runtime.data.model.Aggregation;
 import com.wavemaker.runtime.data.model.AggregationInfo;
 import com.wavemaker.runtime.data.util.CriteriaUtils;
@@ -204,10 +204,9 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     @Transactional
     public Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) {
 
-        WMQueryInfo queryInfo = build(aggregationInfo, getSimpleName(), getNameAlias());
+        QueryInfo queryInfo = build(aggregationInfo, getSimpleName(), getNameAlias());
 
         String query = configureParameters(queryInfo.getQuery(), queryInfo.getParameters());
-
         String countQuery = getCountQuery(query);
 
         long count = isNull(countQuery) ? Integer.MAX_VALUE : (Long) entityManager.createQuery(countQuery).getSingleResult();
