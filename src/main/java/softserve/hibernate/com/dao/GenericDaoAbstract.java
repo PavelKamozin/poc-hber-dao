@@ -203,7 +203,6 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     @Override
     @Transactional
     public Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) {
-
         QueryInfo queryInfo = build(aggregationInfo, getSimpleName(), getNameAlias());
 
         String query = configureParameters(queryInfo.getQuery(), queryInfo.getParameters());
@@ -211,52 +210,71 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
         long count = isNull(countQuery) ? Integer.MAX_VALUE : (Long) entityManager.createQuery(countQuery).getSingleResult();
 
-        List<Map<String, Object>> result = new ArrayList<>();
+        return getPageResult(aggregationInfo, query, count, pageable);
+    }
 
+    private Page<Map<String, Object>> getPageResult(AggregationInfo aggregationInfo, String query, long count, Pageable pageable) {
+
+        List<Map<String, Object>> result;
         List<Aggregation> aggregations = aggregationInfo.getAggregations();
+        List<String> groupByFilters = aggregationInfo.getGroupByFields();
 
         if (!aggregations.isEmpty()) {
-
-            List<Tuple> aggregationData = entityManager.createQuery(query, Tuple.class).getResultList();
-
-            Map<String, Object> data = new HashMap<>();
-
-            if (!aggregationData.isEmpty()) {
-
-                Tuple tuple = aggregationData.get(0);
-
-                for (Aggregation aggregation : aggregations) {
-                    data.put(aggregation.getAlias(), tuple.get(aggregation.getAlias()));
-                }
-
-            }
-
-            result.add(data);
+            result = getAggregatedResult(query, aggregations, groupByFilters);
         } else {
-
-            List<Entity> entityList;
-
-            Query entityQuery = entityManager.createQuery(query);
-
-            if (nonNull(pageable)) {
-                entityQuery
-                        .setFirstResult((int) pageable.getOffset())
-                        .setMaxResults(pageable.getPageSize());
-
-                entityList = count > pageable.getOffset() ? entityQuery.getResultList() : Collections.emptyList();
-            } else {
-                entityList = Collections.emptyList();
-            }
-
-            for (int i = 0; i < entityList.size(); i++) {
-                Entity entity = entityList.get(i);
-                Map<String, Object> item = new HashMap<>();
-                item.put(String.valueOf(i), entity);
-                result.add(item);
-            }
+            result = getResult(query, pageable, count);
         }
 
         return new PageImpl<>(result, pageable, count);
+    }
+
+    private List<Map<String, Object>> getAggregatedResult(String query, List<Aggregation> aggregations, List<String> groupByFilters) {
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        List<Tuple> aggregationData = entityManager.createQuery(query, Tuple.class).getResultList();
+        Map<String, Object> data = new HashMap<>();
+
+        if (!aggregationData.isEmpty()) {
+            Tuple tuple = aggregationData.get(0);
+
+            for (Aggregation aggregation : aggregations) {
+                data.put(aggregation.getAlias(), tuple.get(aggregation.getAlias()));
+            }
+
+            for (String group : groupByFilters) {
+                data.put(group, tuple.get(group));
+            }
+        }
+
+        result.add(data);
+
+        return result;
+    }
+
+    private List<Map<String, Object>> getResult(String query, Pageable pageable, long count) {
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        List<Entity> entityList;
+        Query entityQuery = entityManager.createQuery(query);
+
+        if (nonNull(pageable)) {
+            entityQuery
+                    .setFirstResult((int) pageable.getOffset())
+                    .setMaxResults(pageable.getPageSize());
+
+            entityList = count > pageable.getOffset() ? entityQuery.getResultList() : Collections.emptyList();
+        } else {
+            entityList = Collections.emptyList();
+        }
+
+        for (int i = 0; i < entityList.size(); i++) {
+            Entity entity = entityList.get(i);
+            Map<String, Object> item = new HashMap<>();
+            item.put(String.valueOf(i), entity);
+            result.add(item);
+        }
+
+        return result;
     }
 
     @Override
