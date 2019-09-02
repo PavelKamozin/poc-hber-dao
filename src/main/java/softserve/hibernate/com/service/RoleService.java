@@ -188,5 +188,5 @@ public interface RoleService {
      * @see Pageable
      * @see Page
 	 */
-    Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable);
+    Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) throws IllegalAccessException;
 }

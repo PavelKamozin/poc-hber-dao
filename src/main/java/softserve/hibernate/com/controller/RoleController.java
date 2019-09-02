@@ -167,9 +167,9 @@ public class RoleController {
     }
 
     @ApiOperation(value = "Returns aggregated result with given aggregation info")
-    @RequestMapping(value = "/aggregations", method = RequestMethod.POST)
-    //@XssDisable
-    public Page<Map<String, Object>> getRoleAggregatedValues(@RequestBody AggregationInfo aggregationInfo, Pageable pageable) {
+	@RequestMapping(value = "/aggregations", method = RequestMethod.POST)
+	//@XssDisable
+	public Page<Map<String, Object>> getRoleAggregatedValues(@RequestBody AggregationInfo aggregationInfo, Pageable pageable) throws IllegalAccessException {
         LOGGER.debug("Fetching aggregated results for {}", aggregationInfo);
         return roleService.getAggregatedValues(aggregationInfo, pageable);
     }

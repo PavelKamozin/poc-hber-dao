@@ -169,7 +169,7 @@ public class UserController {
 	@RequestMapping(value = "/aggregations", method = RequestMethod.POST)
     //@WMAccessVisibility(value = AccessSpecifier.APP_ONLY)
 	//@XssDisable
-	public Page<Map<String, Object>> getUserAggregatedValues(@RequestBody AggregationInfo aggregationInfo, Pageable pageable) {
+	public Page<Map<String, Object>> getUserAggregatedValues(@RequestBody AggregationInfo aggregationInfo, Pageable pageable) throws IllegalAccessException {
         LOGGER.debug("Fetching aggregated results for {}", aggregationInfo);
         return userService.getAggregatedValues(aggregationInfo, pageable);
     }

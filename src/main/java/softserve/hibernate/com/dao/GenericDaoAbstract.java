@@ -27,6 +27,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
@@ -200,7 +201,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
     @Override
     @Transactional
-    public Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) {
+    public Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) throws IllegalAccessException {
         QueryInfo queryInfo = build(aggregationInfo, getSimpleName(), getNameAlias());
 
         String query = configureParameters(queryInfo.getQuery(), queryInfo.getParameters());
@@ -211,7 +212,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return getPageResult(aggregationInfo, query, count, pageable);
     }
 
-    private Page<Map<String, Object>> getPageResult(AggregationInfo aggregationInfo, String query, long count, Pageable pageable) {
+    private Page<Map<String, Object>> getPageResult(AggregationInfo aggregationInfo, String query, long count, Pageable pageable) throws IllegalAccessException {
 
         List<Map<String, Object>> result;
         List<Aggregation> aggregations = aggregationInfo.getAggregations();
@@ -259,7 +260,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return result;
     }
 
-    private List<Map<String, Object>> getResult(String query, Pageable pageable, long count) {
+    private List<Map<String, Object>> getResult(String query, Pageable pageable, long count) throws IllegalAccessException {
 
         List<Map<String, Object>> result = new ArrayList<>();
         List<Entity> entityList;
@@ -275,13 +276,23 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
             entityList = Collections.emptyList();
         }
 
-        for (int i = 0; i < entityList.size(); i++) {
-            Entity entity = entityList.get(i);
-            Map<String, Object> item = new HashMap<>();
-            item.put(String.valueOf(i), entity);
+        for (Entity entity : entityList) {
+            Map<String, Object> item = convertEntityToMap(entity);
             result.add(item);
         }
 
+        return result;
+    }
+
+    private Map<String, Object> convertEntityToMap(Entity entity) throws IllegalAccessException {
+        Map<String, Object> result = new HashMap<>();
+        for (Field field : entityClass.getDeclaredFields()) {
+            // Skip this if you intend to access to public fields only
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            result.put(field.getName(), field.get(entity));
+        }
         return result;
     }
 

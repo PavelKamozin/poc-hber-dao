@@ -175,7 +175,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) {
+    public Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) throws IllegalAccessException {
         return this.roleDao.getAggregatedValues(aggregationInfo, pageable);
     }
 
