@@ -231,18 +231,22 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     private List<Map<String, Object>> getAggregatedResult(String query, List<Aggregation> aggregations, List<String> groupByFilters) {
 
         List<Map<String, Object>> result = new ArrayList<>();
-        List<Tuple> aggregationData = entityManager.createQuery(query, Tuple.class).getResultList();
+        List<Tuple> resultData = entityManager.createQuery(query, Tuple.class).getResultList();
         Map<String, Object> data = new HashMap<>();
 
-        if (!aggregationData.isEmpty()) {
-            Tuple tuple = aggregationData.get(0);
+        if (!resultData.isEmpty()) {
+            Tuple tuple = resultData.get(0);
 
-            for (Aggregation aggregation : aggregations) {
-                data.put(aggregation.getAlias(), tuple.get(aggregation.getAlias()));
+            if (nonNull(aggregations)) {
+                for (Aggregation aggregation : aggregations) {
+                    data.put(aggregation.getAlias(), tuple.get(aggregation.getAlias()));
+                }
             }
 
-            for (String group : groupByFilters) {
-                data.put(group, tuple.get(group));
+            if (nonNull(groupByFilters)) {
+                for (String group : groupByFilters) {
+                    data.put(group, tuple.get(group));
+                }
             }
         }
 
