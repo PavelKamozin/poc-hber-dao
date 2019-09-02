@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static com.wavemaker.runtime.data.util.QueryParserConstants.NOTNULL;
+import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
@@ -114,7 +115,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
 
         QueryFilter q3 = new QueryFilter();
         q3.setAttributeName("age");
-        q3.setAttributeValue(Arrays.asList(20, 25, 30));
+        q3.setAttributeValue(asList(20, 25, 30));
         q3.setAttributeType(AttributeType.INTEGER);
         q3.setFilterCondition(Type.IN);
         queryFilters[2] = q3;
@@ -312,6 +313,33 @@ public class UserDaoImplTest extends PersistenceTestBase {
 
         assertEquals(1, resultList.size());
         assertEquals(mito, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
+    }
+
+    @Test
+    public void testGetAggregatedValuesWithGroups() {
+        getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_1)));
+        getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_2)));
+        getUserRepository().save(new User("Rolan", "Undodze", "doctor", 33, userRole, new Date(TIMESTAMP_DATE_3)));
+        getUserRepository().save(new User("Vano", "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_7)));
+        getUserRepository().save(new User("Mito", "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_8)));
+
+        AggregationInfo aggregationInfo = new AggregationInfo();
+
+        aggregationInfo.setFilter(null);
+        aggregationInfo.setGroupByFields(asList("age"));
+        aggregationInfo.setAggregations(null);
+
+        int size = 5;
+        int page = 0;
+
+        Page<Map<String, Object>> results = getUserDao().getAggregatedValues(aggregationInfo, PageRequest.of(page, size));
+
+        List<Map<String, Object>> resultList = results.getContent();
+
+        assertEquals(3, resultList.size());
+        assertEquals(20, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
+        assertEquals(33, resultList.get(1).entrySet().stream().findFirst().orElse(null).getValue());
+        assertEquals(35, resultList.get(2).entrySet().stream().findFirst().orElse(null).getValue());
     }
 
     private void createUsers(Role adminRole, Role userRole, Role guestRole) {
