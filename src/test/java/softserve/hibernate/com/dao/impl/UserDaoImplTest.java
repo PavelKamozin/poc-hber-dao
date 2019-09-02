@@ -290,26 +290,28 @@ public class UserDaoImplTest extends PersistenceTestBase {
 
     @Test
     public void testGetAggregatedValuesWithQueryFunctionsFilters() {
+        User mito = new User("Mito", "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_8));
         getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_1)));
         getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_2)));
         getUserRepository().save(new User("Rolan", "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_3)));
         getUserRepository().save(new User("Vano", "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_7)));
-        getUserRepository().save(new User("Mito", "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_8)));
+        getUserRepository().save(mito);
 
         AggregationInfo aggregationInfo = new AggregationInfo();
 
-        aggregationInfo.setFilter("age <= 33 and job is not null");
+        aggregationInfo.setFilter("created > wm_TS('" + TIMESTAMP_DATE_2 + "') and created <= wm_TS('" + TIMESTAMP_DATE_8 + "')");
         aggregationInfo.setGroupByFields(null);
         aggregationInfo.setAggregations(null);
 
-        int size = 3;
-        int page = 0;
+        int size = 2;
+        int page = 1;
 
         Page<Map<String, Object>> results = getUserDao().getAggregatedValues(aggregationInfo, PageRequest.of(page, size));
 
         List<Map<String, Object>> resultList = results.getContent();
 
-        assertEquals(2, resultList.size());
+        assertEquals(1, resultList.size());
+        assertEquals(mito, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
     }
 
     private void createUsers(Role adminRole, Role userRole, Role guestRole) {

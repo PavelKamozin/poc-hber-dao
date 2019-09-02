@@ -11,14 +11,14 @@ public enum HqlFunction {
         @Override
         public String convertValue(String fromValue) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            return String.valueOf(LocalDateTime.parse(fromValue, formatter));
+            return "'" + LocalDateTime.parse(fromValue, formatter) + "'";
         }
     },
 
     TS {
         @Override
         public String convertValue(String fromValue) {
-            return String.valueOf(new Timestamp(Long.valueOf(fromValue)));
+            return "'" + new Timestamp(Long.valueOf(fromValue)) + "'";
         }
     },
 
