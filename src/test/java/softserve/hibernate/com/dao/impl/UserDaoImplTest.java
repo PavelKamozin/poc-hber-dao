@@ -18,14 +18,25 @@ import softserve.hibernate.com.dao.GenericDao;
 import softserve.hibernate.com.entity.Role;
 import softserve.hibernate.com.entity.User;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
+import static com.wavemaker.runtime.data.expression.HqlFunction.FORMATTER;
 import static com.wavemaker.runtime.data.util.QueryParserConstants.NOTNULL;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class UserDaoImplTest extends PersistenceTestBase {
 
@@ -38,6 +49,14 @@ public class UserDaoImplTest extends PersistenceTestBase {
     private static final long TIMESTAMP_DATE_6 = 1562360400000L;
     private static final long TIMESTAMP_DATE_7 = 1565125200000L;
     private static final long TIMESTAMP_DATE_8 = 1567890000000L;
+
+    private static final String LOCAL_DATE_TIME_1 = "1999-01-04 14:43";
+    private static final String LOCAL_DATE_TIME_2 = "2001-12-06 00:00";
+    private static final String LOCAL_DATE_TIME_3 = "1989-02-29 00:00";
+    private static final String LOCAL_DATE_TIME_4 = "1988-08-17 12:00";
+    private static final String LOCAL_DATE_TIME_5 = "2002-08-03 01:00";
+    private static final String LOCAL_DATE_TIME_6 = "1968-08-03 01:00";
+
     private final String ROLAN_34 = "Rolan";
     private final String MIHO_99 = "Miho";
     private final String MAGA_35 = "Maga";
@@ -391,14 +410,21 @@ public class UserDaoImplTest extends PersistenceTestBase {
     }
 
     private void createUsers(Role adminRole, Role userRole, Role guestRole) {
-        getUserRepository().save(new User(VANO_20, "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_1)));
-        getUserRepository().save(new User(VANO_20, "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_2)));
-        getUserRepository().save(new User(VATO_20, "Idzo", "architect", 25, adminRole, new Date(TIMESTAMP_DATE_3)));
-        getUserRepository().save(new User(SULIKO_30, "Shvili", "no job", 30, adminRole, new Date(TIMESTAMP_DATE_4)));
-        getUserRepository().save(new User(MAGA_35, "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_5)));
-        getUserRepository().save(new User(DATE_33, "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_6)));
-        getUserRepository().save(new User(ROLAN_34, "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_7)));
-        getUserRepository().save(new User(MIHO_99, "Lokodze", "narrator", 99, guestRole, new Date(TIMESTAMP_DATE_8)));
+        getUserRepository().save(new User(VANO_20, "Adzo", "policeman", adminRole, new Date(TIMESTAMP_DATE_1), 85.4f,
+                LocalDateTime.parse(LOCAL_DATE_TIME_1, FORMATTER)));
+        getUserRepository().save(new User(VANO_20, "Kadzo", null, adminRole, new Date(TIMESTAMP_DATE_2), 80.2f,
+                LocalDateTime.parse(LOCAL_DATE_TIME_2, FORMATTER)));
+        getUserRepository().save(new User(VATO_20, "Idzo", "architect", adminRole, new Date(TIMESTAMP_DATE_3), 66.8f,
+                LocalDateTime.parse(LOCAL_DATE_TIME_3, FORMATTER)));
+        getUserRepository().save(new User(SULIKO_30, "Shvili", "no job", adminRole, new Date(TIMESTAMP_DATE_4), 120f,
+                LocalDateTime.parse(LOCAL_DATE_TIME_4, FORMATTER)));
+        getUserRepository().save(new User(MAGA_35, "Onodze", "valet", userRole, new Date(TIMESTAMP_DATE_5), 88f,
+                LocalDateTime.parse(LOCAL_DATE_TIME_6, FORMATTER)));
+        getUserRepository().save(new User(DATE_33, "Redodze", "builder", userRole, new Date(TIMESTAMP_DATE_6), 89.0f,
+                LocalDateTime.parse(LOCAL_DATE_TIME_5, FORMATTER)));
+        getUserRepository().save(new User(ROLAN_34, "Undodze", "doctor", userRole, new Date(TIMESTAMP_DATE_7), 52.0f,
+                LocalDateTime.parse(LOCAL_DATE_TIME_5, FORMATTER)));
+        getUserRepository().save(new User(MIHO_99, "Lokodze", "narrator", guestRole, new Date(TIMESTAMP_DATE_8), 78.5f,
+                LocalDateTime.parse(LOCAL_DATE_TIME_6, FORMATTER)));
     }
-
 }

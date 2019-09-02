@@ -32,7 +32,7 @@ import java.util.Map;
  * @see User
  */
 @RestController("UserController")
-@Api(value = "UserController", description = "Exposes APIs to work with User resource.")
+@Api(value = "UserController", tags = "Exposes APIs to work with User resource.")
 @RequestMapping("/db_hibernate/User")
 public class UserController {
 
