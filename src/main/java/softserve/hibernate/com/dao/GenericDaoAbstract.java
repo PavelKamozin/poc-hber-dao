@@ -253,9 +253,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
                 result.add(data);
             });
 
-
         }
-
 
         return result;
     }

@@ -281,7 +281,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
     }
 
     @Test
-    public void testGetAggregatedValuesWithLegacyQueryFilters() {
+    public void testGetAggregatedValuesWithLegacyQueryFilters() throws IllegalAccessException {
         User rolan = new User("Rolan", "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_3));
         User vano = new User("Vano", "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_7));
 
@@ -311,7 +311,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
     }
 
     @Test
-    public void testGetAggregatedValuesWithQueryFunctionsFilters() {
+    public void testGetAggregatedValuesWithQueryFunctionsFilters() throws IllegalAccessException, InstantiationException {
         User mito = new User("Mito", "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_8));
         getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_1)));
         getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_2)));
@@ -337,7 +337,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
     }
 
     @Test
-    public void testGetAggregatedValuesWithGroups() {
+    public void testGetAggregatedValuesWithGroups() throws IllegalAccessException {
         getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_1)));
         getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_2)));
         getUserRepository().save(new User("Rolan", "Undodze", "doctor", 33, userRole, new Date(TIMESTAMP_DATE_3)));
@@ -364,7 +364,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
     }
 
     @Test
-    public void testGetAggregatedValuesWithAggregations() {
+    public void testGetAggregatedValuesWithAggregations() throws IllegalAccessException {
         getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_1)));
         getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_2)));
         getUserRepository().save(new User("Rolan", "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_3)));
