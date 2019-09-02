@@ -183,8 +183,11 @@ public class UserController {
     public Page<Map<String, Object>> getUserAggregatedValues(@RequestBody AggregationInfo aggregationInfo,
                                                              @RequestParam(defaultValue = "1", required = false) int pageNumber,
                                                              @RequestParam(defaultValue = "20", required = false) int pageSize) throws IllegalAccessException {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("Unexpected error {" + pageNumber + "},please check server logs for more information");
+        }
         LOGGER.debug("Fetching aggregated results for {}", aggregationInfo);
-        return userService.getAggregatedValues(aggregationInfo, PageRequest.of(pageNumber, pageSize));
+        return userService.getAggregatedValues(aggregationInfo, PageRequest.of(pageNumber - 1, pageSize));
     }
 
     /**
