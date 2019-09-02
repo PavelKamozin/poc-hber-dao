@@ -21,6 +21,7 @@ import softserve.hibernate.com.dao.GenericDao;
 import softserve.hibernate.com.entity.Role;
 import softserve.hibernate.com.exception.InvalidInputException;
 import softserve.hibernate.com.service.RoleService;
+import softserve.hibernate.com.service.util.ServiceUtil;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
@@ -102,19 +103,13 @@ public class RoleServiceImpl implements RoleService {
     public Role partialUpdate(Integer rolesId, Role role) {
         LOGGER.debug("Partially Updating the Role with id: {}", rolesId);
 
-        Role roles = getById(rolesId);
+        Role existingRoles = getById(rolesId);
 
-        try {
-            ObjectReader rolesReader = this.objectMapper.reader().forType(Role.class).withValueToUpdate(roles);
-            roles = rolesReader.readValue(this.objectMapper.writeValueAsString(role));
-        } catch (IOException ex) {
-            LOGGER.debug("There was a problem in applying the patch: {}", role, ex);
-            throw new InvalidInputException("Could not apply patch", ex);
-        }
+        ServiceUtil.copyNonNullProperties(role,existingRoles);
 
-        roles = update(roles);
+        existingRoles = update(existingRoles);
 
-        return roles;
+        return existingRoles;
     }
 
     @Transactional
