@@ -19,7 +19,13 @@ import softserve.hibernate.com.entity.Role;
 import softserve.hibernate.com.entity.User;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import static com.wavemaker.runtime.data.expression.HqlFunction.FORMATTER;
@@ -27,7 +33,11 @@ import static com.wavemaker.runtime.data.util.QueryParserConstants.NOTNULL;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class UserDaoImplTest extends PersistenceTestBase {
 
@@ -338,7 +348,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
         AggregationInfo aggregationInfo = new AggregationInfo();
 
         aggregationInfo.setFilter(null);
-        aggregationInfo.setGroupByFields(asList("age"));
+        aggregationInfo.setGroupByFields(Collections.singletonList("age"));
         aggregationInfo.setAggregations(null);
 
         int size = 5;
@@ -349,9 +359,9 @@ public class UserDaoImplTest extends PersistenceTestBase {
         List<Map<String, Object>> resultList = results.getContent();
 
         assertEquals(3, resultList.size());
-        assertEquals(20, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
+        assertEquals(35, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
         assertEquals(33, resultList.get(1).entrySet().stream().findFirst().orElse(null).getValue());
-        assertEquals(35, resultList.get(2).entrySet().stream().findFirst().orElse(null).getValue());
+        assertEquals(20, resultList.get(2).entrySet().stream().findFirst().orElse(null).getValue());
     }
 
     @Test
