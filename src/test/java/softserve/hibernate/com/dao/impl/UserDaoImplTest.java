@@ -259,7 +259,37 @@ public class UserDaoImplTest extends PersistenceTestBase {
     }
 
     @Test
-    public void testGetAggregatedValues() {
+    public void testGetAggregatedValuesWithoutParameters() {
+        User rolan = new User("Rolan", "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_3));
+        User vano = new User("Vano", "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_7));
+
+        getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_1)));
+        getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_2)));
+        getUserRepository().save(rolan);
+        getUserRepository().save(vano);
+        getUserRepository().save(new User("Mito", "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_8)));
+
+        AggregationInfo aggregationInfo = new AggregationInfo();
+
+        aggregationInfo.setFilter(null);
+        aggregationInfo.setGroupByFields(null);
+        aggregationInfo.setAggregations(null);
+
+        int size = 2;
+        int page = 1;
+
+        Page<Map<String, Object>> results = getUserDao().getAggregatedValues(aggregationInfo, PageRequest.of(page, size));
+
+        List<Map<String, Object>> resultList = results.getContent();
+
+        assertEquals(size, resultList.size());
+
+        assertEquals(rolan, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
+        assertEquals(vano, resultList.get(1).entrySet().stream().findFirst().orElse(null).getValue());
+    }
+
+    @Test
+    public void testGetAggregatedValuesWithFilters() {
         User rolan = new User("Rolan", "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_3));
         User vano = new User("Vano", "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_7));
 
