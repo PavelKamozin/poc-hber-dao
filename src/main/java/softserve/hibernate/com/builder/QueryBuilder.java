@@ -2,7 +2,7 @@ package softserve.hibernate.com.builder;
 
 import com.wavemaker.runtime.data.filter.LegacyQueryFilterInterceptor;
 import com.wavemaker.runtime.data.filter.QueryInterceptor;
-import com.wavemaker.runtime.data.filter.WMQueryFunctionInterceptor;
+import com.wavemaker.runtime.data.filter.QueryFunctionInterceptor;
 import com.wavemaker.runtime.data.model.Aggregation;
 import com.wavemaker.runtime.data.model.AggregationInfo;
 import com.wavemaker.runtime.data.model.QueryInfo;
@@ -20,7 +20,7 @@ public class QueryBuilder {
 
     private static final List<QueryInterceptor> interceptors = asList(
             new LegacyQueryFilterInterceptor(),
-            new WMQueryFunctionInterceptor()
+            new QueryFunctionInterceptor()
     );
 
     private static final String FROM = " from ";

@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class WMQueryFunctionInterceptor implements QueryInterceptor {
+public class QueryFunctionInterceptor implements QueryInterceptor {
 
     private static final int FUNCTION_NAME_GROUP = 1;
     private static final int VALUE_GROUP = 2;
