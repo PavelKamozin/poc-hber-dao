@@ -290,32 +290,31 @@ public class UserDaoImplTest extends PersistenceTestBase {
 
     @Test
     public void testGetAggregatedValuesWithFilters() {
-        User rolan = new User("Rolan", "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_3));
+        User date = new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_2));
         User vano = new User("Vano", "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_7));
 
         getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_1)));
-        getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_2)));
-        getUserRepository().save(rolan);
+        getUserRepository().save(date);
+        getUserRepository().save(new User("Rolan", "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_3)));
         getUserRepository().save(vano);
         getUserRepository().save(new User("Mito", "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_8)));
 
         AggregationInfo aggregationInfo = new AggregationInfo();
 
-        aggregationInfo.setFilter(null);
+        aggregationInfo.setFilter("age <= 33 and job is not null");
         aggregationInfo.setGroupByFields(null);
         aggregationInfo.setAggregations(null);
 
-        int size = 2;
-        int page = 1;
+        int size = 3;
+        int page = 0;
 
         Page<Map<String, Object>> results = getUserDao().getAggregatedValues(aggregationInfo, PageRequest.of(page, size));
 
         List<Map<String, Object>> resultList = results.getContent();
 
-        assertEquals(size, resultList.size());
-
-        assertUser(rolan, (User) (resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue()));
-        assertUser(vano, (User) (resultList.get(1).entrySet().stream().findFirst().orElse(null).getValue()));
+        assertEquals(2, resultList.size());
+        assertEquals(date, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
+        assertEquals(vano, resultList.get(1).entrySet().stream().findFirst().orElse(null).getValue());
     }
 
     private void createUsers(Role adminRole, Role userRole, Role guestRole) {
