@@ -29,7 +29,6 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static com.wavemaker.runtime.data.expression.HqlFunction.FORMATTER;
 import static com.wavemaker.runtime.data.util.QueryParserConstants.NOTNULL;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,6 +38,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static softserve.hibernate.com.config.Constants.SQL.FORMATTER;
 
 public class UserDaoImplTest extends PersistenceTestBase {
 

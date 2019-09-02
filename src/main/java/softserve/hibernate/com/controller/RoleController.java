@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +25,9 @@ import softserve.hibernate.com.entity.Role;
 import softserve.hibernate.com.service.RoleService;
 
 import java.util.Map;
+
+import static softserve.hibernate.com.config.Constants.Controller.DEFAULT_PAGE_SIZE;
+import static softserve.hibernate.com.config.Constants.Controller.DEFAULT_START_PAGE;
 
 /**
  * Controller object for domain model class Role.
@@ -102,33 +105,44 @@ public class RoleController {
     }
 
     /**
-     * @deprecated Use {@link #findRole(String, Pageable)} instead.
+     * @deprecated Use {@link #findRole(String, int, int)} instead.
      */
     @Deprecated
     @ApiOperation(value = "Returns the list of Role instances matching the search criteria.")
     @RequestMapping(value = "/search", method = RequestMethod.POST)
     //@WMAccessVisibility(value = AccessSpecifier.APP_ONLY)
     ////@XssDisable
-    public Page<Role> searchRoleByQueryFilters(Pageable pageable, @RequestBody QueryFilter[] queryFilters) {
+    public Page<Role> searchRoleByQueryFilters(@RequestParam(defaultValue = DEFAULT_START_PAGE, required = false) int pageNumber,
+                                               @RequestParam(defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize,
+                                               @RequestBody QueryFilter[] queryFilters) {
         LOGGER.debug("Rendering Role list by query filter: {}", (Object) queryFilters);
-        return roleService.findAll(queryFilters, pageable);
+        return roleService.findAll(queryFilters, PageRequest.of(pageNumber, pageSize));
     }
 
-    @ApiOperation(value = "Returns the paginated list of Role instances matching the optional query (q) request param. If there is no query provided, it returns all the instances. Pagination & Sorting parameters such as page& size, sort can be sent as request parameters. The sort value should be a comma separated list of field names & optional sort order to sort the data on. eg: field1 asc, field2 desc etc ")
+    @ApiOperation(value = "Returns the paginated list of Role instances matching the optional query (q) request param. " +
+            "If there is no query provided, it returns all the instances. Pagination & Sorting parameters such as page& size, " +
+            "sort can be sent as request parameters. The sort value should be a comma separated list of field names " +
+            "& optional sort order to sort the data on. eg: field1 asc, field2 desc etc ")
     @RequestMapping(method = RequestMethod.GET)
     //@WMAccessVisibility(value = AccessSpecifier.APP_ONLY)
-    public Page<Role> findRole(@ApiParam("conditions to filter the results") @RequestParam(value = "q", required = false) String query, Pageable pageable) {
+    public Page<Role> findRole(@ApiParam("conditions to filter the results") @RequestParam(value = "q", required = false) String query,
+                               @RequestParam(defaultValue = DEFAULT_START_PAGE, required = false) int pageNumber,
+                               @RequestParam(defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize) {
         LOGGER.debug("Rendering Role list by filter: {}", query);
-        return roleService.findAll(query, pageable);
+        return roleService.findAll(query, PageRequest.of(pageNumber, pageSize));
     }
 
-    @ApiOperation(value = "Returns the paginated list of Role instances matching the optional query (q) request param. This API should be used only if the query string is too big to fit in GET request with request param. The request has to made in application/x-www-form-urlencoded format.")
+    @ApiOperation(value = "Returns the paginated list of Role instances matching the optional query (q) request param." +
+            " This API should be used only if the query string is too big to fit in GET request with request param. " +
+            "The request has to made in application/x-www-form-urlencoded format.")
     @RequestMapping(value = "/filter", method = RequestMethod.POST, consumes = "application/x-www-form-urlencoded")
     //@WMAccessVisibility(value = AccessSpecifier.APP_ONLY)
     //@XssDisable
-    public Page<Role> filterRole(@ApiParam("conditions to filter the results") @RequestParam(value = "q", required = false) String query, Pageable pageable) {
-        LOGGER.debug("Rendering Role list by filter", query);
-        return roleService.findAll(query, pageable);
+    public Page<Role> filterRole(@ApiParam("conditions to filter the results") @RequestParam(value = "q", required = false) String query,
+                                 @RequestParam(defaultValue = DEFAULT_START_PAGE, required = false) int pageNumber,
+                                 @RequestParam(defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize) {
+        LOGGER.debug("Rendering Role list by filter {}", query);
+        return roleService.findAll(query, PageRequest.of(pageNumber, pageSize));
     }
 
         /*
@@ -169,9 +183,12 @@ public class RoleController {
     @ApiOperation(value = "Returns aggregated result with given aggregation info")
 	@RequestMapping(value = "/aggregations", method = RequestMethod.POST)
 	//@XssDisable
-	public Page<Map<String, Object>> getRoleAggregatedValues(@RequestBody AggregationInfo aggregationInfo, Pageable pageable) throws IllegalAccessException {
+	public Page<Map<String, Object>> getRoleAggregatedValues(@RequestBody AggregationInfo aggregationInfo,
+                                                             @RequestParam(defaultValue = DEFAULT_START_PAGE, required = false) int pageNumber,
+                                                             @RequestParam(defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize)
+            throws IllegalAccessException {
         LOGGER.debug("Fetching aggregated results for {}", aggregationInfo);
-        return roleService.getAggregatedValues(aggregationInfo, pageable);
+        return roleService.getAggregatedValues(aggregationInfo, PageRequest.of(pageNumber, pageSize));
     }
 
 

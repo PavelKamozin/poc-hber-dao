@@ -22,6 +22,9 @@ import softserve.hibernate.com.service.UserService;
 
 import java.util.Map;
 
+import static softserve.hibernate.com.config.Constants.Controller.DEFAULT_PAGE_SIZE;
+import static softserve.hibernate.com.config.Constants.Controller.DEFAULT_START_PAGE;
+
 /**
  * Controller object for domain model class User.
  *
@@ -106,8 +109,8 @@ public class UserController {
     @RequestMapping(value = "/search", method = RequestMethod.POST)
     //@WMAccessVisibility(value = AccessSpecifier.APP_ONLY)
     //@XssDisable
-    public Page<User> searchUserByQueryFilters(@RequestParam(defaultValue = "1", required = false) int pageNumber,
-                                               @RequestParam(defaultValue = "20", required = false) int pageSize,
+    public Page<User> searchUserByQueryFilters(@RequestParam(defaultValue = DEFAULT_START_PAGE, required = false) int pageNumber,
+                                               @RequestParam(defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize,
                                                @RequestBody QueryFilter[] queryFilters) {
         LOGGER.debug("Rendering User list by query filter:{}", (Object) queryFilters);
         return userService.findAll(queryFilters, PageRequest.of(pageNumber, pageSize));
@@ -120,8 +123,8 @@ public class UserController {
     @RequestMapping(method = RequestMethod.GET)
     //@WMAccessVisibility(value = AccessSpecifier.APP_ONLY)
     public Page<User> findUser(@ApiParam("conditions to filter the results") @RequestParam(value = "q", required = false) String query,
-                               @RequestParam(defaultValue = "1", required = false) int pageNumber,
-                               @RequestParam(defaultValue = "20", required = false) int pageSize) {
+                               @RequestParam(defaultValue = DEFAULT_START_PAGE, required = false) int pageNumber,
+                               @RequestParam(defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize) {
         LOGGER.debug("Rendering User list by filter: {}", query);
         return userService.findAll(query, PageRequest.of(pageNumber, pageSize));
     }
@@ -133,8 +136,8 @@ public class UserController {
     //@WMAccessVisibility(value = AccessSpecifier.APP_ONLY)
     //@XssDisable
     public Page<User> filterUser(@ApiParam("conditions to filter the results") @RequestParam(value = "q", required = false) String query,
-                                 @RequestParam(defaultValue = "1", required = false) int pageNumber,
-                                 @RequestParam(defaultValue = "20", required = false) int pageSize) {
+                                 @RequestParam(defaultValue = DEFAULT_START_PAGE, required = false) int pageNumber,
+                                 @RequestParam(defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize) {
         LOGGER.debug("Rendering User list by filter {}", query);
         return userService.findAll(query, PageRequest.of(pageNumber, pageSize));
     }
@@ -181,8 +184,8 @@ public class UserController {
     //@WMAccessVisibility(value = AccessSpecifier.APP_ONLY)
     //@XssDisable
     public Page<Map<String, Object>> getUserAggregatedValues(@RequestBody AggregationInfo aggregationInfo,
-                                                             @RequestParam(defaultValue = "1", required = false) int pageNumber,
-                                                             @RequestParam(defaultValue = "20", required = false) int pageSize) throws IllegalAccessException {
+                                                             @RequestParam(defaultValue = DEFAULT_START_PAGE, required = false) int pageNumber,
+                                                             @RequestParam(defaultValue = DEFAULT_PAGE_SIZE, required = false) int pageSize) throws IllegalAccessException {
         if (pageNumber < 1) {
             throw new IllegalArgumentException("Unexpected error {" + pageNumber + "},please check server logs for more information");
         }

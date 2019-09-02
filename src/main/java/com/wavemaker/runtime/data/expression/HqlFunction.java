@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static softserve.hibernate.com.config.Constants.SQL.DATE_PATTERN;
+
 public enum HqlFunction {
 
     DT {
@@ -28,9 +30,6 @@ public enum HqlFunction {
             return String.valueOf(Float.valueOf(fromValue));
         }
     };
-
-    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm";
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public abstract String convertValue(String fromValue);
 }
