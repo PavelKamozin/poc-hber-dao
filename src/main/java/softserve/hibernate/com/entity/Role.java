@@ -19,9 +19,6 @@ public class Role implements Serializable {
     @Column(name = "role", columnDefinition = "ENUM('GUEST','USER','ADMIN')", nullable = false)
     private RoleType roleType;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date created;
-
     public Role() {
     }
 
@@ -43,14 +40,6 @@ public class Role implements Serializable {
 
     public void setRoleType(RoleType roleType) {
         this.roleType = roleType;
-    }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
     }
 
     @Override
