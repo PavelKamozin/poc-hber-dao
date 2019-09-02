@@ -3,7 +3,9 @@ package softserve.hibernate.com.dao.impl;
 import com.wavemaker.runtime.data.expression.AttributeType;
 import com.wavemaker.runtime.data.expression.QueryFilter;
 import com.wavemaker.runtime.data.expression.Type;
+import com.wavemaker.runtime.data.model.Aggregation;
 import com.wavemaker.runtime.data.model.AggregationInfo;
+import com.wavemaker.runtime.data.model.AggregationType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -340,6 +342,52 @@ public class UserDaoImplTest extends PersistenceTestBase {
         assertEquals(20, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
         assertEquals(33, resultList.get(1).entrySet().stream().findFirst().orElse(null).getValue());
         assertEquals(35, resultList.get(2).entrySet().stream().findFirst().orElse(null).getValue());
+    }
+
+    @Test
+    public void testGetAggregatedValuesWithAggregations() {
+        getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_1)));
+        getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_2)));
+        getUserRepository().save(new User("Rolan", "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_3)));
+        getUserRepository().save(new User("Vano", "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_7)));
+        getUserRepository().save(new User("Mito", "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_8)));
+
+        AggregationInfo aggregationInfo = new AggregationInfo();
+
+        aggregationInfo.setFilter(null);
+        aggregationInfo.setGroupByFields(null);
+
+        List<Aggregation> aggregations = new ArrayList<>();
+
+        Aggregation aggregation1 = new Aggregation();
+        aggregation1.setType(AggregationType.AVG);
+        aggregation1.setAlias("avg");
+        aggregation1.setField("age");
+
+        aggregations.add(aggregation1);
+
+        Aggregation aggregation2 = new Aggregation();
+        aggregation2.setType(AggregationType.SUM);
+        aggregation2.setAlias("sum");
+        aggregation2.setField("age");
+
+        aggregations.add(aggregation2);
+
+        aggregationInfo.setAggregations(aggregations);
+
+        int size = 4;
+        int page = 0;
+
+        Page<Map<String, Object>> results = getUserDao().getAggregatedValues(aggregationInfo, PageRequest.of(page, size));
+
+        List<Map<String, Object>> resultList = results.getContent();
+
+        assertEquals(1, resultList.size());
+
+        Map<String, Object> resultPage = resultList.get(0);
+
+        assertEquals(142L, resultPage.get("sum"));
+        assertEquals(28.4, resultPage.get("avg"));
     }
 
     private void createUsers(Role adminRole, Role userRole, Role guestRole) {
