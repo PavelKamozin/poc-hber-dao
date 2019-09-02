@@ -15,12 +15,7 @@ import softserve.hibernate.com.dao.GenericDao;
 import softserve.hibernate.com.entity.Role;
 import softserve.hibernate.com.entity.User;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static com.wavemaker.runtime.data.util.QueryParserConstants.NOTNULL;
@@ -33,7 +28,16 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class UserDaoImplTest extends PersistenceTestBase {
+
     private static final Logger log = Logger.getLogger(UserDaoImplTest.class.getName());
+    private static final long TIMESTAMP_DATE_1 = 1548972000000L;
+    private static final long TIMESTAMP_DATE_2 = 1551477600000L;
+    private static final long TIMESTAMP_DATE_3 = 1554238800000L;
+    private static final long TIMESTAMP_DATE_4 = 1556917200000L;
+    private static final long TIMESTAMP_DATE_5 = 1559682000000L;
+    private static final long TIMESTAMP_DATE_6 = 1562360400000L;
+    private static final long TIMESTAMP_DATE_7 = 1565125200000L;
+    private static final long TIMESTAMP_DATE_8 = 1567890000000L;
     private final String ROLAN_34 = "Rolan";
     private final String MIHO_99 = "Miho";
     private final String MAGA_35 = "Maga";
@@ -48,14 +52,20 @@ public class UserDaoImplTest extends PersistenceTestBase {
 
     @Before
     public void createRoles() {
+        getUserRepository().deleteAll();
         adminRole = getRoleRepository().getByRoleType(RoleType.ADMIN);
         userRole = getRoleRepository().getByRoleType(RoleType.USER);
         guestRole = getRoleRepository().getByRoleType(RoleType.GUEST);
     }
 
+    @After
+    public void destroy() {
+        getUserRepository().deleteAll();
+    }
+
     @Test
     public void testReadCreate() {
-        User expected = getUserRepository().save(new User("Read user", "Name", "Job", 20, adminRole));
+        User expected = getUserRepository().save(new User("Read user", "Name", "Job", 20, adminRole, new Date(1570568400000L)));
         User actual = getDao().findById(expected.getId());
 
         assertUser(expected, actual);
@@ -63,7 +73,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
 
     @Test
     public void testUpdate() {
-        User original = getUserRepository().save(new User("Read user", "Name", "Job", 20, adminRole));
+        User original = getUserRepository().save(new User("Read user", "Name", "Job", 20, adminRole, new Date(1573336800000L)));
         User expected = getDao().findById(original.getId());
 
         expected.setName("New name");
@@ -76,7 +86,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
 
     @Test
     public void testDelete() {
-        User original = getUserRepository().save(new User("Read user", "Name", "Job", 20, adminRole));
+        User original = getUserRepository().save(new User("Read user", "Name", "Job", 20, adminRole, new Date(1576015200000L)));
         User actual = getDao().findById(original.getId());
 
         assertUser(original, actual);
@@ -190,7 +200,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
     @Test
     public void testFindByUniqueKeyWhenExist() {
         createUsers(adminRole, userRole, guestRole);
-        User expectedUser = new User("IVano", "IAdzo", "policeman", 24, adminRole);
+        User expectedUser = new User("IVano", "IAdzo", "policeman", 24, adminRole, new Date(1570568400000L));
         getUserRepository().save(expectedUser);
         Map<String, Object> uniqueKey = new HashMap<>();
         uniqueKey.put("name", "IVano");
@@ -205,7 +215,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
     @Test
     public void testFindByUniqueKeyWhenNotExist() {
         createUsers(adminRole, userRole, guestRole);
-        User expectedUser = new User("IVano", "IAdzo", "policeman", 24, adminRole);
+        User expectedUser = new User("IVano", "IAdzo", "policeman", 24, adminRole, new Date(1573336800000L));
         getUserRepository().save(expectedUser);
         Map<String, Object> uniqueKey = new HashMap<>();
         uniqueKey.put("name", "Iano");
@@ -232,30 +242,30 @@ public class UserDaoImplTest extends PersistenceTestBase {
     }
 
     private void createUsers(Role adminRole, Role userRole, Role guestRole) {
-        getUserRepository().save(new User(VANO_20, "Adzo", "policeman", 20, adminRole));
-        getUserRepository().save(new User(VANO_20, "Kadzo", null, 20, adminRole));
-        getUserRepository().save(new User(VATO_20, "Idzo", "architect", 25, adminRole));
-        getUserRepository().save(new User(SULIKO_30, "Shvili", "no job", 30, adminRole));
-        getUserRepository().save(new User(MAGA_35, "Onodze", "valet", 35, userRole));
-        getUserRepository().save(new User(DATE_33, "Redodze", "builder", 33, userRole));
-        getUserRepository().save(new User(ROLAN_34, "Undodze", "doctor", 34, userRole));
-        getUserRepository().save(new User(MIHO_99, "Lokodze", "narrator", 99, guestRole));
+        getUserRepository().save(new User(VANO_20, "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_1)));
+        getUserRepository().save(new User(VANO_20, "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_2)));
+        getUserRepository().save(new User(VATO_20, "Idzo", "architect", 25, adminRole, new Date(TIMESTAMP_DATE_3)));
+        getUserRepository().save(new User(SULIKO_30, "Shvili", "no job", 30, adminRole, new Date(TIMESTAMP_DATE_4)));
+        getUserRepository().save(new User(MAGA_35, "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_5)));
+        getUserRepository().save(new User(DATE_33, "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_6)));
+        getUserRepository().save(new User(ROLAN_34, "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_7)));
+        getUserRepository().save(new User(MIHO_99, "Lokodze", "narrator", 99, guestRole, new Date(TIMESTAMP_DATE_8)));
     }
 
     @Test
     public void testFindByMultipleIdsExist() {
         List<Integer> ids = new ArrayList<>();
         List<User> expectedUsers = new ArrayList<>();
-        User expectedUser1 = getUserRepository().save(new User("Vato", "Idzo", "architect", 25, adminRole));
+        User expectedUser1 = getUserRepository().save(new User("Vato", "Idzo", "architect", 25, adminRole, new Date(TIMESTAMP_DATE_1)));
         expectedUsers.add(expectedUser1);
-        User expectedUser2 = getUserRepository().save(new User("Suliko", "Shvili", "no job", 30, adminRole));
+        User expectedUser2 = getUserRepository().save(new User("Suliko", "Shvili", "no job", 30, adminRole, new Date(TIMESTAMP_DATE_2)));
         expectedUsers.add(expectedUser2);
         ids.add(expectedUser1.getId());
         ids.add(expectedUser2.getId());
 
-        getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole));
-        getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole));
-        getUserRepository().save(new User("Rolan", "Undodze", "doctor", 34, userRole));
+        getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_3)));
+        getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_4)));
+        getUserRepository().save(new User("Rolan", "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_5)));
         List<User> actualUsers = getDao().findByMultipleIds(ids, false);
 
         assertEquals(actualUsers.size(), ids.size());

@@ -1,15 +1,9 @@
 package softserve.hibernate.com.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -28,6 +22,9 @@ public class User implements Serializable {
 
     private Integer age;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
+
     @ManyToOne
     @JoinColumn(name = "id_role")
     private Role role;
@@ -40,11 +37,12 @@ public class User implements Serializable {
         this.role = role;
     }
 
-    public User(String name, String lastName, String job, Integer age, Role role) {
+    public User(String name, String lastName, String job, Integer age, Role role, Date created) {
         this.name = name;
         this.lastName = lastName;
         this.job = job;
         this.age = age;
+        this.created = created;
         this.role = role;
     }
 
@@ -96,31 +94,30 @@ public class User implements Serializable {
         this.role = role;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", role=" + role +
-                '}';
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id &&
+        return Objects.equals(id, user.id) &&
                 Objects.equals(name, user.name) &&
+                Objects.equals(lastName, user.lastName) &&
+                Objects.equals(job, user.job) &&
+                Objects.equals(age, user.age) &&
+                Objects.equals(created, user.created) &&
                 Objects.equals(role, user.role);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, role);
+        return Objects.hash(id, name, lastName, job, age, created, role);
     }
 }
