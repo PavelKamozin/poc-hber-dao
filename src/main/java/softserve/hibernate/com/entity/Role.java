@@ -1,7 +1,7 @@
 package softserve.hibernate.com.entity;
 
-import java.io.Serializable;
-import java.util.Objects;
+import softserve.hibernate.com.constant.RoleType;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,8 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import softserve.hibernate.com.constant.RoleType;
+import java.io.Serializable;
+import java.util.Objects;
 
 
 @Entity
@@ -49,23 +49,11 @@ public class Role implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return "Role{" +
-                "id=" + id +
-                ", roleType=" + roleType +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Role role = (Role) o;
-        return id == role.id &&
+        return Objects.equals(id, role.id) &&
                 roleType == role.roleType;
     }
 

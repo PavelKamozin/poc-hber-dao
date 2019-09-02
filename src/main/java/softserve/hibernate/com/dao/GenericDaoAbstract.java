@@ -1,12 +1,9 @@
 package softserve.hibernate.com.dao;
 
 import com.wavemaker.runtime.data.expression.QueryFilter;
-import com.wavemaker.runtime.data.filter.LegacyQueryFilterInterceptor;
-import com.wavemaker.runtime.data.filter.QueryInterceptor;
-import com.wavemaker.runtime.data.filter.WMQueryFunctionInterceptor;
-import com.wavemaker.runtime.data.filter.WMQueryInfo;
 import com.wavemaker.runtime.data.model.Aggregation;
 import com.wavemaker.runtime.data.model.AggregationInfo;
+import com.wavemaker.runtime.data.model.QueryInfo;
 import com.wavemaker.runtime.data.util.CriteriaUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +11,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
-import org.hibernate.query.internal.QueryImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -25,28 +21,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.Tuple;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static softserve.hibernate.com.builder.QueryBuilder.*;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
-
-    private static final List<QueryInterceptor> interceptors = Arrays.asList(
-            new LegacyQueryFilterInterceptor(),
-            new WMQueryFunctionInterceptor());
 
     private static final String SELECT = " select ";
     private static final String FROM = " from ";
@@ -55,10 +44,6 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
     private static final String ID = "id ";
     private static final String ORDER_BY = " order by ";
     private static final String WHITE_SPACE = " ";
-    private static final String COUNT_QUERY_TEMPLATE = "select count(*) from ({0}) wmTempTable";
-    private static final String GROUP_BY = " group by ";
-    private static final String SELECT_COUNT1 = "select count(*) ";
-    private static final String FROM_HQL = "FROM ";
 
     private EntityManager entityManager;
     private Class<Entity> entityClass;
@@ -104,8 +89,8 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         fieldValueMap.forEach((key, value) -> filterPredicates.add(criteriaBuilder.equal(entityRoot.get(key), value)));
         cq.where(filterPredicates.toArray(new Predicate[0]));
         return (entityManager.createQuery(cq).getResultList().size() != 0
-            && entityManager.createQuery(cq).getResultList().size()==1) ?
-            entityManager.createQuery(cq).getResultList().get(0) : null;
+                && entityManager.createQuery(cq).getResultList().size() == 1) ?
+                entityManager.createQuery(cq).getResultList().get(0) : null;
     }
 
     @Override
@@ -216,151 +201,102 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
     @Override
     @Transactional
-    public Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) {
+    public Page<Map<String, Object>> getAggregatedValues(AggregationInfo aggregationInfo, Pageable pageable) throws IllegalAccessException {
+        QueryInfo queryInfo = build(aggregationInfo, getSimpleName(), getNameAlias());
 
-        WMQueryInfo queryInfo = build(aggregationInfo);
-
-        String query = queryInfo.getQuery();
-
+        String query = configureParameters(queryInfo.getQuery(), queryInfo.getParameters());
         String countQuery = getCountQuery(query);
 
-        long count = (Long) entityManager.createQuery(countQuery).getSingleResult();
+        long count = isNull(countQuery) ? Integer.MAX_VALUE : (Long) entityManager.createQuery(countQuery).getSingleResult();
 
-        Query queryEntity = entityManager.createQuery(query);
+        return getPageResult(aggregationInfo, query, count, pageable);
+    }
 
-        List<String> entities;
+    private Page<Map<String, Object>> getPageResult(AggregationInfo aggregationInfo, String query, long count, Pageable pageable) throws IllegalAccessException {
+
+        List<Map<String, Object>> result;
+        List<Aggregation> aggregations = aggregationInfo.getAggregations();
+        List<String> groupByFilters = aggregationInfo.getGroupByFields();
+
+        if ((nonNull(aggregations) && !aggregations.isEmpty())
+                || (nonNull(groupByFilters) && !groupByFilters.isEmpty())) {
+            result = getAggregatedResult(query, aggregations, groupByFilters);
+        } else {
+            result = getResult(query, pageable, count);
+        }
+
+        return new PageImpl<>(result, pageable, count);
+    }
+
+    private List<Map<String, Object>> getAggregatedResult(String query, List<Aggregation> aggregations, List<String> groupByFilters) {
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        List<Tuple> resultData = entityManager.createQuery(query, Tuple.class).getResultList();
+
+        if (!resultData.isEmpty()) {
+
+            resultData.forEach(element -> {
+                Map<String, Object> data = new HashMap<>();
+
+                if (nonNull(aggregations)) {
+                    for (Aggregation aggregation : aggregations) {
+                        data.put(aggregation.getAlias(), element.get(aggregation.getAlias()));
+                    }
+                }
+
+                if (nonNull(groupByFilters)) {
+                    for (String group : groupByFilters) {
+                        data.put(group, element.get(group));
+                    }
+                }
+
+                result.add(data);
+            });
+
+        }
+
+        return result;
+    }
+
+    private List<Map<String, Object>> getResult(String query, Pageable pageable, long count) throws IllegalAccessException {
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        List<Entity> entityList;
+        Query entityQuery = entityManager.createQuery(query);
 
         if (nonNull(pageable)) {
-
-            queryEntity
+            entityQuery
                     .setFirstResult((int) pageable.getOffset())
                     .setMaxResults(pageable.getPageSize());
 
-            entities = count > pageable.getOffset() ? queryEntity.getResultList() : Collections.emptyList();
-
+            entityList = count > pageable.getOffset() ? entityQuery.getResultList() : Collections.emptyList();
         } else {
-            entities = Collections.emptyList();
+            entityList = Collections.emptyList();
         }
 
-        System.out.println(entities);
+        for (Entity entity : entityList) {
+            Map<String, Object> item = convertEntityToMap(entity);
+            result.add(item);
+        }
 
-        return null;
+        return result;
+    }
+
+    private Map<String, Object> convertEntityToMap(Entity entity) throws IllegalAccessException {
+        Map<String, Object> result = new HashMap<>();
+        for (Field field : entityClass.getDeclaredFields()) {
+            // Skip this if you intend to access to public fields only
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            result.put(field.getName(), field.get(entity));
+        }
+        return result;
     }
 
     @Override
     public Entity refresh(Entity entity) {
         return repository.saveAndFlush(entity);
-    }
-
-    private Map<String, Object> getAliasValues(Query queryEntity) {
-        String[] alias = ((QueryImpl) queryEntity).getReturnAliases();
-        List<Integer> values = (List<Integer>) queryEntity.getResultList().get(0);
-
-        Map<String, Object> dataAliases = new HashMap<>();
-
-        for (int i = 0; i < alias.length; i++) {
-            dataAliases.put(alias[i], values.get(i));
-        }
-
-        return dataAliases;
-
-    }
-
-    public WMQueryInfo build(AggregationInfo aggregationInfo) {
-        StringBuilder builder = new StringBuilder();
-        Map<String, Object> parameters = new HashMap<>();
-
-        String projections = generateProjections(aggregationInfo);
-
-        if (StringUtils.isNotBlank(projections)) {
-            builder.append("select ")
-                    .append(projections)
-                    .append(" ");
-        }
-
-        builder.append("from ")
-                .append(getSimpleName())
-                .append(" ");
-
-        String filter = aggregationInfo.getFilter();
-
-        if (StringUtils.isNotBlank(filter)) {
-            final WMQueryInfo queryInfo = interceptFilter(filter);
-            builder.append("where ")
-                    .append(queryInfo.getQuery())
-                    .append(" ");
-            parameters = queryInfo.getParameters();
-        }
-
-        List<String> groupByFields = aggregationInfo.getGroupByFields();
-
-        if (!groupByFields.isEmpty()) {
-            builder.append("group by ")
-                    .append(StringUtils.join(groupByFields, ","))
-                    .append(" ");
-        }
-
-        return new WMQueryInfo(builder.toString(), parameters);
-    }
-
-    private String generateProjections(AggregationInfo aggregationInfo) {
-        List<String> projections = new ArrayList<>();
-
-        List<String> groupByFields = aggregationInfo.getGroupByFields();
-
-        if (!groupByFields.isEmpty()) {
-            for (final String field : groupByFields) {
-                projections.add(field + " as " + cleanAlias(field));
-            }
-        }
-
-        List<Aggregation> aggregations = aggregationInfo.getAggregations();
-
-        if (!aggregations.isEmpty()) {
-            for (final Aggregation aggregation : aggregations) {
-                projections.add(aggregation.asSelection());
-            }
-        }
-
-        return StringUtils.join(projections, ",");
-    }
-
-    private String cleanAlias(String alias) {
-        return alias.replaceAll("\\.", "\\$");
-    }
-
-    private WMQueryInfo interceptFilter(String filter) {
-        WMQueryInfo queryInfo = new WMQueryInfo(filter);
-
-        for (final QueryInterceptor interceptor : interceptors) {
-            interceptor.intercept(queryInfo);
-        }
-
-        return queryInfo;
-    }
-
-    private String getCountQuery(String query) {
-        query = query.trim();
-
-        String countQuery = null;
-        int index = StringUtils.indexOfIgnoreCase(query, GROUP_BY);
-        if (index == -1) {
-            index = StringUtils.indexOfIgnoreCase(query, FROM_HQL);
-            if (index >= 0) {
-                if (index != 0) {
-                    index = StringUtils.indexOfIgnoreCase(query, FROM);
-                    if (index > 0) {
-                        query = query.substring(index);
-                    }
-                }
-                index = StringUtils.indexOfIgnoreCase(query, ORDER_BY);
-                if (index >= 0) {
-                    query = query.substring(0, index);
-                }
-                countQuery = SELECT_COUNT1 + query;
-            }
-        }
-        return countQuery;
     }
 
     @Override

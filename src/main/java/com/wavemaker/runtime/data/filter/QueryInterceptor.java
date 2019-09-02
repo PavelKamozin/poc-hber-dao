@@ -1,7 +1,9 @@
 package com.wavemaker.runtime.data.filter;
 
+import com.wavemaker.runtime.data.model.QueryInfo;
+
 public interface QueryInterceptor {
 
-    void intercept(WMQueryInfo queryInfo);
+    void intercept(QueryInfo queryInfo);
 
 }

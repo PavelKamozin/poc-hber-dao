@@ -1,7 +1,5 @@
 package softserve.hibernate.com.entity;
 
-import java.io.Serializable;
-import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +8,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -28,6 +32,13 @@ public class User implements Serializable {
 
     private Integer age;
 
+    private Float weight;
+
+    private LocalDateTime birthDay;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
+
     @ManyToOne
     @JoinColumn(name = "id_role")
     private Role role;
@@ -40,11 +51,23 @@ public class User implements Serializable {
         this.role = role;
     }
 
-    public User(String name, String lastName, String job, Integer age, Role role) {
+    public User(String name, String lastName, String job, Integer age, Role role, Date created) {
         this.name = name;
         this.lastName = lastName;
         this.job = job;
         this.age = age;
+        this.created = created;
+        this.role = role;
+    }
+
+    public User(String name, String lastName, String job, Role role, Date created, Float weight, LocalDateTime birthDay) {
+        this.name = name;
+        this.lastName = lastName;
+        this.job = job;
+        this.age = LocalDateTime.now().getYear() - birthDay.getYear();
+        this.weight = weight;
+        this.birthDay = birthDay;
+        this.created = created;
         this.role = role;
     }
 
@@ -96,31 +119,48 @@ public class User implements Serializable {
         this.role = role;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", role=" + role +
-                '}';
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public Float getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Float weight) {
+        this.weight = weight;
+    }
+
+    public LocalDateTime getBirthDay() {
+        return birthDay;
+    }
+
+    public void setBirthDay(LocalDateTime birthDay) {
+        this.birthDay = birthDay;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id &&
-                Objects.equals(name, user.name) &&
-                Objects.equals(role, user.role);
+        return getId().equals(user.getId()) &&
+                getName().equals(user.getName()) &&
+                Objects.equals(getLastName(), user.getLastName()) &&
+                Objects.equals(getJob(), user.getJob()) &&
+                Objects.equals(getAge(), user.getAge()) &&
+                Objects.equals(getWeight(), user.getWeight()) &&
+                Objects.equals(getBirthDay(), user.getBirthDay()) &&
+                Objects.equals(getCreated(), user.getCreated()) &&
+                getRole().equals(user.getRole());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, role);
+        return Objects.hash(getId(), getName(), getLastName(), getJob(), getAge(), weight, birthDay, getCreated(), getRole());
     }
 }

@@ -33,7 +33,7 @@ public interface GenericDao<Entity, Identifier> {
 
     long count(String query);
 
-    Page<Map<String, Object>> getAggregatedValues(final AggregationInfo aggregationInfo, Pageable pageable);
+    Page<Map<String, Object>> getAggregatedValues(final AggregationInfo aggregationInfo, Pageable pageable) throws IllegalAccessException;
 
     <Entity> Entity execute(HibernateCallback<Entity> hibernateCallback);
 
