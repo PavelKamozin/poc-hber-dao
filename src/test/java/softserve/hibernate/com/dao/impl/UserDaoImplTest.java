@@ -26,6 +26,8 @@ import java.util.logging.Logger;
 import static com.wavemaker.runtime.data.util.QueryParserConstants.NOTNULL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -49,11 +51,6 @@ public class UserDaoImplTest extends PersistenceTestBase {
         adminRole = getRoleRepository().getByRoleType(RoleType.ADMIN);
         userRole = getRoleRepository().getByRoleType(RoleType.USER);
         guestRole = getRoleRepository().getByRoleType(RoleType.GUEST);
-    }
-
-    @After
-    public void removeUsers() {
-        getUserRepository().deleteAll();
     }
 
     @Test
@@ -203,7 +200,6 @@ public class UserDaoImplTest extends PersistenceTestBase {
         uniqueKey.put("role", adminRole);
         User actualUser = getDao().findByUniqueKey(uniqueKey);
         assertUser(expectedUser, actualUser);
-
     }
 
     @Test
@@ -244,5 +240,25 @@ public class UserDaoImplTest extends PersistenceTestBase {
         getUserRepository().save(new User(DATE_33, "Redodze", "builder", 33, userRole));
         getUserRepository().save(new User(ROLAN_34, "Undodze", "doctor", 34, userRole));
         getUserRepository().save(new User(MIHO_99, "Lokodze", "narrator", 99, guestRole));
+    }
+
+    @Test
+    public void testFindByMultipleIdsExist() {
+        List<Integer> ids = new ArrayList<>();
+        List<User> expectedUsers = new ArrayList<>();
+        User expectedUser1 = getUserRepository().save(new User("Vato", "Idzo", "architect", 25, adminRole));
+        expectedUsers.add(expectedUser1);
+        User expectedUser2 = getUserRepository().save(new User("Suliko", "Shvili", "no job", 30, adminRole));
+        expectedUsers.add(expectedUser2);
+        ids.add(expectedUser1.getId());
+        ids.add(expectedUser2.getId());
+
+        getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole));
+        getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole));
+        getUserRepository().save(new User("Rolan", "Undodze", "doctor", 34, userRole));
+        List<User> actualUsers = getDao().findByMultipleIds(ids, false);
+
+        assertEquals(actualUsers.size(), ids.size());
+        assertArrayEquals(expectedUsers.toArray(), actualUsers.toArray());
     }
 }

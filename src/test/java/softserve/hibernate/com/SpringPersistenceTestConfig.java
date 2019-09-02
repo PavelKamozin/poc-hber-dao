@@ -28,6 +28,8 @@ public class SpringPersistenceTestConfig {
 
     @PostConstruct
     public void load() {
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
         roleRepository.save(new Role(RoleType.ADMIN));
         roleRepository.save(new Role(RoleType.USER));
         roleRepository.save(new Role(RoleType.GUEST));
