@@ -219,7 +219,7 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         List<Aggregation> aggregations = aggregationInfo.getAggregations();
         List<String> groupByFilters = aggregationInfo.getGroupByFields();
 
-        if (!aggregations.isEmpty()) {
+        if (nonNull(aggregations) && !aggregations.isEmpty()) {
             result = getAggregatedResult(query, aggregations, groupByFilters);
         } else {
             result = getResult(query, pageable, count);

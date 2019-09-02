@@ -54,7 +54,7 @@ public class QueryBuilder {
 
         List<String> groupByFields = aggregationInfo.getGroupByFields();
 
-        if (!groupByFields.isEmpty()) {
+        if (nonNull(groupByFields) && !groupByFields.isEmpty()) {
             builder.append(" group by ")
                     .append(StringUtils.join(groupByFields, ","));
         }
@@ -67,7 +67,7 @@ public class QueryBuilder {
 
         List<String> groupByFields = aggregationInfo.getGroupByFields();
 
-        if (!groupByFields.isEmpty()) {
+        if (nonNull(groupByFields) && !groupByFields.isEmpty()) {
             for (String field : groupByFields) {
                 projections.add(field + " as " + cleanAlias(field));
             }
@@ -75,7 +75,7 @@ public class QueryBuilder {
 
         List<Aggregation> aggregations = aggregationInfo.getAggregations();
 
-        if (!aggregations.isEmpty()) {
+        if (nonNull(aggregations) && !aggregations.isEmpty()) {
             for (Aggregation aggregation : aggregations) {
                 projections.add(aggregation.asSelection());
             }

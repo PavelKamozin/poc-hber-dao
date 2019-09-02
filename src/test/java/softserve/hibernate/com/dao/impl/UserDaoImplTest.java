@@ -3,6 +3,7 @@ package softserve.hibernate.com.dao.impl;
 import com.wavemaker.runtime.data.expression.AttributeType;
 import com.wavemaker.runtime.data.expression.QueryFilter;
 import com.wavemaker.runtime.data.expression.Type;
+import com.wavemaker.runtime.data.model.AggregationInfo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,11 +22,7 @@ import java.util.logging.Logger;
 import static com.wavemaker.runtime.data.util.QueryParserConstants.NOTNULL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class UserDaoImplTest extends PersistenceTestBase {
 
@@ -241,17 +238,6 @@ public class UserDaoImplTest extends PersistenceTestBase {
         assertThat(expected.getRole().getId(), is(actual.getRole().getId()));
     }
 
-    private void createUsers(Role adminRole, Role userRole, Role guestRole) {
-        getUserRepository().save(new User(VANO_20, "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_1)));
-        getUserRepository().save(new User(VANO_20, "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_2)));
-        getUserRepository().save(new User(VATO_20, "Idzo", "architect", 25, adminRole, new Date(TIMESTAMP_DATE_3)));
-        getUserRepository().save(new User(SULIKO_30, "Shvili", "no job", 30, adminRole, new Date(TIMESTAMP_DATE_4)));
-        getUserRepository().save(new User(MAGA_35, "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_5)));
-        getUserRepository().save(new User(DATE_33, "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_6)));
-        getUserRepository().save(new User(ROLAN_34, "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_7)));
-        getUserRepository().save(new User(MIHO_99, "Lokodze", "narrator", 99, guestRole, new Date(TIMESTAMP_DATE_8)));
-    }
-
     @Test
     public void testFindByMultipleIdsExist() {
         List<Integer> ids = new ArrayList<>();
@@ -271,4 +257,46 @@ public class UserDaoImplTest extends PersistenceTestBase {
         assertEquals(actualUsers.size(), ids.size());
         assertArrayEquals(expectedUsers.toArray(), actualUsers.toArray());
     }
+
+    @Test
+    public void testGetAggregatedValues() {
+        User rolan = new User("Rolan", "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_3));
+        User vano = new User("Vano", "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_7));
+
+        getUserRepository().save(new User("Maga", "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_1)));
+        getUserRepository().save(new User("Date", "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_2)));
+        getUserRepository().save(rolan);
+        getUserRepository().save(vano);
+        getUserRepository().save(new User("Mito", "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_8)));
+
+        AggregationInfo aggregationInfo = new AggregationInfo();
+
+        aggregationInfo.setFilter(null);
+        aggregationInfo.setGroupByFields(null);
+        aggregationInfo.setAggregations(null);
+
+        int size = 2;
+        int page = 1;
+
+        Page<Map<String, Object>> results = getUserDao().getAggregatedValues(aggregationInfo, PageRequest.of(page, size));
+
+        List<Map<String, Object>> resultList = results.getContent();
+
+        assertEquals(size, resultList.size());
+
+        assertUser(rolan, (User) (resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue()));
+        assertUser(vano, (User) (resultList.get(1).entrySet().stream().findFirst().orElse(null).getValue()));
+    }
+
+    private void createUsers(Role adminRole, Role userRole, Role guestRole) {
+        getUserRepository().save(new User(VANO_20, "Adzo", "policeman", 20, adminRole, new Date(TIMESTAMP_DATE_1)));
+        getUserRepository().save(new User(VANO_20, "Kadzo", null, 20, adminRole, new Date(TIMESTAMP_DATE_2)));
+        getUserRepository().save(new User(VATO_20, "Idzo", "architect", 25, adminRole, new Date(TIMESTAMP_DATE_3)));
+        getUserRepository().save(new User(SULIKO_30, "Shvili", "no job", 30, adminRole, new Date(TIMESTAMP_DATE_4)));
+        getUserRepository().save(new User(MAGA_35, "Onodze", "valet", 35, userRole, new Date(TIMESTAMP_DATE_5)));
+        getUserRepository().save(new User(DATE_33, "Redodze", "builder", 33, userRole, new Date(TIMESTAMP_DATE_6)));
+        getUserRepository().save(new User(ROLAN_34, "Undodze", "doctor", 34, userRole, new Date(TIMESTAMP_DATE_7)));
+        getUserRepository().save(new User(MIHO_99, "Lokodze", "narrator", 99, guestRole, new Date(TIMESTAMP_DATE_8)));
+    }
+
 }
