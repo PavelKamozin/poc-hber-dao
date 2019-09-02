@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static com.wavemaker.runtime.data.expression.HqlFunction.FORMATTER;
 import static com.wavemaker.runtime.data.util.QueryParserConstants.NOTNULL;
@@ -307,8 +308,19 @@ public class UserDaoImplTest extends PersistenceTestBase {
 
         assertEquals(size, resultList.size());
 
-        assertEquals(rolan, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
-        assertEquals(vano, resultList.get(1).entrySet().stream().findFirst().orElse(null).getValue());
+        Stream.of(rolan, vano).forEach(expectedUser -> {
+            assertNotNull(
+                    resultList
+                            .stream()
+                            .map(map -> {
+                                User user = new User();
+                                user.setId((Integer) map.get("id"));
+                                return user;
+                            })
+                            .filter(user -> user.getId().equals(expectedUser.getId()))
+                            .findFirst()
+                            .orElse(null));
+        });
     }
 
     @Test
@@ -334,7 +346,7 @@ public class UserDaoImplTest extends PersistenceTestBase {
         List<Map<String, Object>> resultList = results.getContent();
 
         assertEquals(1, resultList.size());
-        assertEquals(mito, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
+        assertEquals(mito.getLastName(), resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
     }
 
     @Test
