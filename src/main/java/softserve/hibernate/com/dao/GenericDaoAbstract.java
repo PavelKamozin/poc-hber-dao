@@ -1,9 +1,9 @@
 package softserve.hibernate.com.dao;
 
 import com.wavemaker.runtime.data.expression.QueryFilter;
-import com.wavemaker.runtime.data.model.QueryInfo;
 import com.wavemaker.runtime.data.model.Aggregation;
 import com.wavemaker.runtime.data.model.AggregationInfo;
+import com.wavemaker.runtime.data.model.QueryInfo;
 import com.wavemaker.runtime.data.util.CriteriaUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,9 +32,7 @@ import java.util.*;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static softserve.hibernate.com.builder.QueryBuilder.build;
-import static softserve.hibernate.com.builder.QueryBuilder.configureParameters;
-import static softserve.hibernate.com.builder.QueryBuilder.getCountQuery;
+import static softserve.hibernate.com.builder.QueryBuilder.*;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
@@ -219,7 +217,8 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         List<Aggregation> aggregations = aggregationInfo.getAggregations();
         List<String> groupByFilters = aggregationInfo.getGroupByFields();
 
-        if (nonNull(aggregations) && !aggregations.isEmpty()) {
+        if ((nonNull(aggregations) && !aggregations.isEmpty())
+                || (nonNull(groupByFilters) && !groupByFilters.isEmpty())) {
             result = getAggregatedResult(query, aggregations, groupByFilters);
         } else {
             result = getResult(query, pageable, count);
@@ -232,25 +231,30 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
 
         List<Map<String, Object>> result = new ArrayList<>();
         List<Tuple> resultData = entityManager.createQuery(query, Tuple.class).getResultList();
-        Map<String, Object> data = new HashMap<>();
 
         if (!resultData.isEmpty()) {
-            Tuple tuple = resultData.get(0);
 
-            if (nonNull(aggregations)) {
-                for (Aggregation aggregation : aggregations) {
-                    data.put(aggregation.getAlias(), tuple.get(aggregation.getAlias()));
-                }
-            }
+            resultData.forEach(element -> {
+                Map<String, Object> data = new HashMap<>();
 
-            if (nonNull(groupByFilters)) {
-                for (String group : groupByFilters) {
-                    data.put(group, tuple.get(group));
+                if (nonNull(aggregations)) {
+                    for (Aggregation aggregation : aggregations) {
+                        data.put(aggregation.getAlias(), element.get(aggregation.getAlias()));
+                    }
                 }
-            }
+
+                if (nonNull(groupByFilters)) {
+                    for (String group : groupByFilters) {
+                        data.put(group, element.get(group));
+                    }
+                }
+
+                result.add(data);
+            });
+
+
         }
 
-        result.add(data);
 
         return result;
     }
