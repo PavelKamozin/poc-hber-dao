@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import softserve.hibernate.com.dao.GenericDao;
 import softserve.hibernate.com.entity.User;
-import softserve.hibernate.com.service.util.ServiceUtil;
 import softserve.hibernate.com.service.UserService;
+import softserve.hibernate.com.service.util.ServiceUtil;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
