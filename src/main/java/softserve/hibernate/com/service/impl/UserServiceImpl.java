@@ -24,6 +24,7 @@ import softserve.hibernate.com.service.util.ServiceUtil;
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -85,11 +86,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUniqueKey(Map<String, Object> fieldValueMap) {
-        LOGGER.debug("Finding User by map : {}", fieldValueMap);
-        return this.userDao.findByUniqueKey(fieldValueMap);
+    public User findByUniqueKey(User user) throws IllegalAccessException {
+        if (Objects.isNull(user)) {
+            String message = "Can't proceed with empty User object";
+            LOGGER.error(message);
+            throw new IllegalArgumentException(message);
+        }
+        LOGGER.debug("Finding User by map : {}", user);
+        return this.userDao.findByUniqueKey(user);
     }
-
 
     @Transactional(rollbackFor = EntityNotFoundException.class)
     @Override

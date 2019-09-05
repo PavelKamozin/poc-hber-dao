@@ -77,7 +77,7 @@ public interface UserService {
      * @param fieldValueMap The id's of the User to get; value cannot be null.
      * @return User associated with the given map of values.
      */
-    User findByUniqueKey(Map<String, Object> fieldValueMap);
+    User findByUniqueKey(User user) throws IllegalAccessException;
 
     /**
      * Updates the details of an existing User. It replaces all fields of the existing User with the given users.

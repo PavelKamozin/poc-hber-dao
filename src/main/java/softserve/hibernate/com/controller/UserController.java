@@ -197,19 +197,19 @@ public class UserController {
     @ApiOperation(value = "Returns users by multiple ids")
     @RequestMapping(value = "/findByMultipleIds", method = RequestMethod.POST)
     public List<User> findByMultipleIds(@RequestBody List<Integer> usersIds,
-        @ApiParam("conditions to order the results")
-        @RequestParam(value = "q", required = false)
-            boolean orderedReturn){
+                                        @ApiParam("conditions to order the results")
+                                        @RequestParam(value = "q", required = false)
+                                                boolean orderedReturn) {
         LOGGER.debug("Rendering User list by list userIds {}", usersIds);
-        return userService.findByMultipleIds(usersIds,orderedReturn);
+        return userService.findByMultipleIds(usersIds, orderedReturn);
     }
 
 
     @ApiOperation(value = "Returns user by map of unique keys")
     @RequestMapping(value = "/findByUniqueKey", method = RequestMethod.POST)
-    public User findByUniqueKey(@RequestBody Map<String,Object> fieldValueMap){
-        LOGGER.debug("Rendering User by list userIds {}", fieldValueMap);
-        return userService.findByUniqueKey(fieldValueMap);
+    public User findByUniqueKey(@RequestBody User user) throws IllegalAccessException {
+        LOGGER.debug("Rendering User by user object {}", user);
+        return userService.findByUniqueKey(user);
     }
 
     /**

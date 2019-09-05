@@ -78,7 +78,7 @@ public interface RoleService {
      * @param fieldValueMap The id's of the Role to get; value cannot be null.
      * @return User associated with the given map of values.
      */
-    Role findByUniqueKey(Map<String, Object> fieldValueMap);
+    Role findByUniqueKey(Role role) throws IllegalAccessException;
 
 
     /**

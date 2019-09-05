@@ -24,6 +24,7 @@ import softserve.hibernate.com.service.util.ServiceUtil;
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * ServiceImpl object for domain model class Role.
@@ -84,11 +85,15 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Role findByUniqueKey(Map<String, Object> fieldValueMap) {
-        LOGGER.debug("Finding Role by map: {}", fieldValueMap);
-        return this.roleDao.findByUniqueKey(fieldValueMap);
+    public Role findByUniqueKey(Role role) throws IllegalAccessException {
+        if (Objects.isNull(role)) {
+            String message = "Can't proceed with empty Role object";
+            LOGGER.error(message);
+            throw new IllegalArgumentException(message);
+        }
+        LOGGER.debug("Finding Role by map: {}", role);
+        return this.roleDao.findByUniqueKey(role);
     }
-
 
     @Transactional(rollbackFor = EntityNotFoundException.class)
     @Override

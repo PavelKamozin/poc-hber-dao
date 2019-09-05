@@ -88,19 +88,21 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return repository.findById(entityId).orElse(null);
     }
 
-
     @Override
     @Transactional
-    public Entity findByUniqueKey(Map<String, Object> fieldValueMap) {
+    public Entity findByUniqueKey(Entity entity) throws IllegalAccessException {
+        Map<String, Object> fieldValueMap = convertEntityToMap(entity);
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Entity> cq = criteriaBuilder.createQuery(entityClass);
         Root<Entity> entityRoot = cq.from(entityClass);
         List<Predicate> filterPredicates = new ArrayList<>();
-        fieldValueMap.forEach((key, value) -> filterPredicates.add(criteriaBuilder.equal(entityRoot.get(key), value)));
+        fieldValueMap.forEach((key, value) -> {
+            if (value != null ) {
+                filterPredicates.add(criteriaBuilder.equal(entityRoot.get(key), value));
+            }
+        });
         cq.where(filterPredicates.toArray(new Predicate[0]));
-        return (entityManager.createQuery(cq).getResultList().size() != 0
-                && entityManager.createQuery(cq).getResultList().size() == 1) ?
-                entityManager.createQuery(cq).getResultList().get(0) : null;
+        return entityManager.createQuery(cq).getSingleResult();
     }
 
     @Override

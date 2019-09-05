@@ -193,23 +193,22 @@ public class RoleController {
     }
 
 
-
     @ApiOperation(value = "Returns users by multiple ids")
     @RequestMapping(value = "/findByMultipleIds", method = RequestMethod.POST)
     public List<Role> findByMultipleIds(@RequestBody List<Integer> roleIds,
-        @ApiParam("conditions to order the results")
-        @RequestParam(value = "q", required = false)
-            boolean orderedReturn){
+                                        @ApiParam("conditions to order the results")
+                                        @RequestParam(value = "q", required = false)
+                                                boolean orderedReturn) {
         LOGGER.debug("Rendering User list by list userIds {}", roleIds);
-        return roleService.findByMultipleIds(roleIds,orderedReturn);
+        return roleService.findByMultipleIds(roleIds, orderedReturn);
     }
 
 
     @ApiOperation(value = "Returns user by map of unique keys")
     @RequestMapping(value = "/findByUniqueKey", method = RequestMethod.POST)
-    public Role findByUniqueKey(@RequestBody Map<String,Object> fieldValueMap){
-        LOGGER.debug("Rendering User by map of unique keys {}", fieldValueMap);
-        return roleService.findByUniqueKey(fieldValueMap);
+    public Role findByUniqueKey(@RequestBody Role role) throws IllegalAccessException {
+        LOGGER.debug("Rendering Role by object {}", role);
+        return roleService.findByUniqueKey(role);
     }
     /**
      * This setter method should only be used by unit tests

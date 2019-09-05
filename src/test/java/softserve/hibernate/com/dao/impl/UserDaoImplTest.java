@@ -9,6 +9,7 @@ import com.wavemaker.runtime.data.model.AggregationType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -219,33 +219,34 @@ public class UserDaoImplTest extends PersistenceTestBase {
     }
 
     @Test
-    public void testFindByUniqueKeyWhenExist() {
+    public void testFindByUniqueKeyWhenExist() throws IllegalAccessException {
         createUsers(adminRole, userRole, guestRole);
         User expectedUser = new User("IVano", "IAdzo", "policeman", 24, adminRole, new Date(1570568400000L));
         getUserRepository().save(expectedUser);
-        Map<String, Object> uniqueKey = new HashMap<>();
-        uniqueKey.put("name", "IVano");
-        uniqueKey.put("lastName", "IAdzo");
-        uniqueKey.put("job", "policeman");
-        uniqueKey.put("age", 24);
-        uniqueKey.put("role", adminRole);
+        User uniqueKey = new User();
+        uniqueKey.setName("IVano");
+        uniqueKey.setLastName("IAdzo");
+        uniqueKey.setJob("policeman");
+        uniqueKey.setAge(24);
+        uniqueKey.setRole(adminRole);
+
         User actualUser = getDao().findByUniqueKey(uniqueKey);
         assertUser(expectedUser, actualUser);
     }
 
-    @Test
-    public void testFindByUniqueKeyWhenNotExist() {
+    @Test(expected = EmptyResultDataAccessException.class)
+    public void testFindByUniqueKeyWhenNotExist() throws IllegalAccessException {
         createUsers(adminRole, userRole, guestRole);
         User expectedUser = new User("IVano", "IAdzo", "policeman", 24, adminRole, new Date(1573336800000L));
         getUserRepository().save(expectedUser);
-        Map<String, Object> uniqueKey = new HashMap<>();
-        uniqueKey.put("name", "Iano");
-        uniqueKey.put("lastName", "IAdzo");
-        uniqueKey.put("job", "policeman");
-        uniqueKey.put("age", 24);
-        uniqueKey.put("role", adminRole);
-        User actualUser = getDao().findByUniqueKey(uniqueKey);
-        assertNull(actualUser);
+        User uniqueKey = new User();
+        uniqueKey.setName("Iano");
+        uniqueKey.setLastName("IAdzo");
+        uniqueKey.setJob("policeman");
+        uniqueKey.setAge(24);
+        uniqueKey.setRole(adminRole);
+
+        getDao().findByUniqueKey(uniqueKey);
     }
 
     public GenericDao<User, Integer> getDao() {
@@ -360,7 +361,8 @@ public class UserDaoImplTest extends PersistenceTestBase {
         AggregationInfo aggregationInfo = new AggregationInfo();
 
         aggregationInfo.setFilter(null);
-        aggregationInfo.setGroupByFields(Collections.singletonList("age"));
+        String alias = "age";
+        aggregationInfo.setGroupByFields(Collections.singletonList(alias));
         aggregationInfo.setAggregations(null);
 
         int size = 5;
@@ -371,9 +373,9 @@ public class UserDaoImplTest extends PersistenceTestBase {
         List<Map<String, Object>> resultList = results.getContent();
 
         assertEquals(3, resultList.size());
-        assertEquals(35, resultList.get(0).entrySet().stream().findFirst().orElse(null).getValue());
-        assertEquals(33, resultList.get(1).entrySet().stream().findFirst().orElse(null).getValue());
-        assertEquals(20, resultList.get(2).entrySet().stream().findFirst().orElse(null).getValue());
+        assertEquals(1, results.stream().filter(result -> (Integer) result.get(alias) == 35).count());
+        assertEquals(1, results.stream().filter(result -> (Integer) result.get(alias) == 33).count());
+        assertEquals(1, results.stream().filter(result -> (Integer) result.get(alias) == 20).count());
     }
 
     @Test
