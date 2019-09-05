@@ -84,6 +84,12 @@ public class UserServiceImpl implements UserService {
         return this.userDao.findByMultipleIds(usersIds, orderedReturn);
     }
 
+    @Override
+    public User findByUniqueKey(Map<String, Object> fieldValueMap) {
+        LOGGER.debug("Finding User by map : {}", fieldValueMap);
+        return this.userDao.findByUniqueKey(fieldValueMap);
+    }
+
 
     @Transactional(rollbackFor = EntityNotFoundException.class)
     @Override

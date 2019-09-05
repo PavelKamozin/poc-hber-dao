@@ -64,6 +64,20 @@ public interface UserService {
      */
     List<User> findByMultipleIds(List<Integer> usersIds, boolean orderedReturn);
 
+    /**
+     * Find and return the User by given map of keys and values.
+     *
+     * If orderedReturn true, the return List is ordered and positional relative to the incoming ids.
+     *
+     * In case of unknown entities:
+     *
+     * If enabled, A null is inserted into the List at the proper position(s).
+     * If disabled, the nulls are not put into the return List.
+     *
+     * @param fieldValueMap The id's of the User to get; value cannot be null.
+     * @return User associated with the given map of values.
+     */
+    User findByUniqueKey(Map<String, Object> fieldValueMap);
 
     /**
      * Updates the details of an existing User. It replaces all fields of the existing User with the given users.

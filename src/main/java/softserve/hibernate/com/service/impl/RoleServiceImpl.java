@@ -83,6 +83,12 @@ public class RoleServiceImpl implements RoleService {
         return this.roleDao.findByMultipleIds(rolesIds, orderedReturn);
     }
 
+    @Override
+    public Role findByUniqueKey(Map<String, Object> fieldValueMap) {
+        LOGGER.debug("Finding Role by map: {}", fieldValueMap);
+        return this.roleDao.findByUniqueKey(fieldValueMap);
+    }
+
 
     @Transactional(rollbackFor = EntityNotFoundException.class)
     @Override

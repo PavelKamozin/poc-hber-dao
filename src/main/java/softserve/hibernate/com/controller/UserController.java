@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import softserve.hibernate.com.entity.User;
 import softserve.hibernate.com.service.UserService;
 
+import java.util.List;
 import java.util.Map;
 
 import static softserve.hibernate.com.config.Constants.Controller.DEFAULT_PAGE_SIZE;
@@ -191,6 +192,24 @@ public class UserController {
         }
         LOGGER.debug("Fetching aggregated results for {}", aggregationInfo);
         return userService.getAggregatedValues(aggregationInfo, PageRequest.of(pageNumber - 1, pageSize));
+    }
+
+    @ApiOperation(value = "Returns users by multiple ids")
+    @RequestMapping(value = "/findByMultipleIds", method = RequestMethod.POST)
+    public List<User> findByMultipleIds(@RequestBody List<Integer> usersIds,
+        @ApiParam("conditions to order the results")
+        @RequestParam(value = "q", required = false)
+            boolean orderedReturn){
+        LOGGER.debug("Rendering User list by list userIds {}", usersIds);
+        return userService.findByMultipleIds(usersIds,orderedReturn);
+    }
+
+
+    @ApiOperation(value = "Returns user by map of unique keys")
+    @RequestMapping(value = "/findByUniqueKey", method = RequestMethod.POST)
+    public User findByUniqueKey(@RequestBody Map<String,Object> fieldValueMap){
+        LOGGER.debug("Rendering User by list userIds {}", fieldValueMap);
+        return userService.findByUniqueKey(fieldValueMap);
     }
 
     /**
