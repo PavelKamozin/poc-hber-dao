@@ -1,8 +1,8 @@
 package softserve.hibernate.com.builder;
 
 import com.wavemaker.runtime.data.filter.LegacyQueryFilterInterceptor;
-import com.wavemaker.runtime.data.filter.QueryInterceptor;
 import com.wavemaker.runtime.data.filter.QueryFunctionInterceptor;
+import com.wavemaker.runtime.data.filter.QueryInterceptor;
 import com.wavemaker.runtime.data.model.Aggregation;
 import com.wavemaker.runtime.data.model.AggregationInfo;
 import com.wavemaker.runtime.data.model.QueryInfo;

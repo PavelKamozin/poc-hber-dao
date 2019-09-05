@@ -19,7 +19,7 @@ public interface GenericDao<Entity, Identifier> {
 
     Entity findById(Identifier entityId);
 
-    Entity findByUniqueKey(final Map<String, Object> fieldValueMap);
+    Entity findByUniqueKey(final Entity entity) throws IllegalAccessException;
 
     Page<Entity> list(Pageable pageable);
 

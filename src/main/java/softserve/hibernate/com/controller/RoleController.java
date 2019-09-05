@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import softserve.hibernate.com.entity.Role;
 import softserve.hibernate.com.service.RoleService;
 
+import java.util.List;
 import java.util.Map;
 
 import static softserve.hibernate.com.config.Constants.Controller.DEFAULT_PAGE_SIZE;
@@ -192,6 +193,23 @@ public class RoleController {
     }
 
 
+    @ApiOperation(value = "Returns users by multiple ids")
+    @RequestMapping(value = "/findByMultipleIds", method = RequestMethod.POST)
+    public List<Role> findByMultipleIds(@RequestBody List<Integer> roleIds,
+                                        @ApiParam("conditions to order the results")
+                                        @RequestParam(value = "q", required = false)
+                                                boolean orderedReturn) {
+        LOGGER.debug("Rendering User list by list userIds {}", roleIds);
+        return roleService.findByMultipleIds(roleIds, orderedReturn);
+    }
+
+
+    @ApiOperation(value = "Returns user by map of unique keys")
+    @RequestMapping(value = "/findByUniqueKey", method = RequestMethod.POST)
+    public Role findByUniqueKey(@RequestBody Role role) throws IllegalAccessException {
+        LOGGER.debug("Rendering Role by object {}", role);
+        return roleService.findByUniqueKey(role);
+    }
     /**
      * This setter method should only be used by unit tests
      *

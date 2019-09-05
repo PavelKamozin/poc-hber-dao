@@ -18,6 +18,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.orm.hibernate5.HibernateCallback;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import softserve.hibernate.com.controller.RoleController;
+import softserve.hibernate.com.controller.UserController;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -29,11 +31,19 @@ import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static softserve.hibernate.com.builder.QueryBuilder.*;
+import static softserve.hibernate.com.builder.QueryBuilder.build;
+import static softserve.hibernate.com.builder.QueryBuilder.configureParameters;
+import static softserve.hibernate.com.builder.QueryBuilder.getCountQuery;
 
 public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier extends Serializable> implements GenericDao<Entity, Identifier> {
 
@@ -78,19 +88,21 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return repository.findById(entityId).orElse(null);
     }
 
-
     @Override
     @Transactional
-    public Entity findByUniqueKey(Map<String, Object> fieldValueMap) {
+    public Entity findByUniqueKey(Entity entity) throws IllegalAccessException {
+        Map<String, Object> fieldValueMap = convertEntityToMap(entity);
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Entity> cq = criteriaBuilder.createQuery(entityClass);
         Root<Entity> entityRoot = cq.from(entityClass);
         List<Predicate> filterPredicates = new ArrayList<>();
-        fieldValueMap.forEach((key, value) -> filterPredicates.add(criteriaBuilder.equal(entityRoot.get(key), value)));
+        fieldValueMap.forEach((key, value) -> {
+            if (value != null ) {
+                filterPredicates.add(criteriaBuilder.equal(entityRoot.get(key), value));
+            }
+        });
         cq.where(filterPredicates.toArray(new Predicate[0]));
-        return (entityManager.createQuery(cq).getResultList().size() != 0
-                && entityManager.createQuery(cq).getResultList().size() == 1) ?
-                entityManager.createQuery(cq).getResultList().get(0) : null;
+        return entityManager.createQuery(cq).getSingleResult();
     }
 
     @Override
@@ -144,10 +156,20 @@ public abstract class GenericDaoAbstract<Entity extends Serializable, Identifier
         return orderedReturn ? ORDER_BY + ID + " asc " : "";
     }
 
+
+    /**
+     * Still used Hibernate Criteria instead of JPA Criteria as this method is only used in one deprecated method in
+     * controller search%Entity%ByQueryFilters
+     *
+     * @see RoleController#searchRoleByQueryFilters(int, int, QueryFilter[])
+     * @see UserController#searchUserByQueryFilters(int, int, QueryFilter[])
+     *
+     * Use {@link RoleController#findRole(String, int, int)} instead
+     * Use {@link UserController#findUser(String, int, int)} instead
+     */
     @Override
     @Transactional
     public Page<Entity> search(QueryFilter[] queryFilters, Pageable pageable) {
-        // TODO: Rewrite to use JPA Criteria as Hibernate Criteria deprecated since 5.2 for Session
         Criteria criteria = entityManager.unwrap(Session.class).createCriteria(entityClass);
         Set<String> aliases = new HashSet<>();
         if (ArrayUtils.isNotEmpty(queryFilters)) {
